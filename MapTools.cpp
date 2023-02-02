@@ -11,6 +11,9 @@ MapTools::MapTools()
     
 }
 
+//change stuff
+
+
 const std::string& MapTools::mapName() const
 {
     return m_mapName;

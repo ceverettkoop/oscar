@@ -4,7 +4,7 @@
 
 #include <BWAPI.h>
 
-class StarterBot
+class StarterBot : public BWAPI::AIModule
 {
     MapTools m_mapTools;
 
