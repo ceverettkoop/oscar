@@ -32,20 +32,6 @@ public:
 	void onUnitHide(BWAPI::Unit unit);
 	void onUnitRenegade(BWAPI::Unit unit);
 
-	//build order
-	
-
 
 };
 
-class InitialBuildOrder{
-	//just stores what to build at drone count x
-	std::vector<int> ibo_droneCount; //requisite count to build unit or struct at i
-	std::vector<bool> ibo_isUnit; //is unit or building
-
-public:
-	bool is_ibo_finished(int droneCount);
-	int unitToBuild(int droneCount);
-	
-	void load_ibo(std::string path);
-};
