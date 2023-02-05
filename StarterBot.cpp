@@ -19,6 +19,9 @@ void StarterBot::onStart()
 
     // Call MapTools OnStart
     m_mapTools.onStart();
+
+    //load ibo (TODO make path relative; load multiple ibos etc)
+    ibo.load_ibo("/home/sean/development/starterbot/resources/2gatewaypvz");
 }
 
 // Called on each frame of the game
@@ -30,11 +33,14 @@ void StarterBot::onFrame()
     // Send our idle workers to mine minerals so they don't just stand there
     sendIdleWorkersToMinerals();
 
+    //built next unit/building or wait for money to accrue
+    buildNext();
+
     // Train more workers so we can gather more income
-    trainAdditionalWorkers();
+    //trainAdditionalWorkers();
 
     // Build more supply if we are going to run out soon
-    buildAdditionalSupply();
+    //buildAdditionalSupply();
 
     // Draw unit health bars, which brood war unfortunately does not do
     Tools::DrawUnitHealthBars();
@@ -168,4 +174,29 @@ void StarterBot::onUnitHide(BWAPI::Unit unit)
 void StarterBot::onUnitRenegade(BWAPI::Unit unit)
 { 
 	
+}
+
+//Build next item in queue. 
+int StarterBot::buildNext(){
+
+    //later make this conditional on prev result
+    bq.updateQueue(FAILED);
+    
+    //first see if we have enough money and supply
+    //if bq say it's next we just have to wait otherwise, bq contains logic to change plan
+    if( bq.next.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
+        bq.next.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
+        bq.next.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed())){
+            if(bq.next.isBuilding()){
+                if(!Tools::BuildBuilding(bq.next)) return FAILED; //TODO edit function to return result
+                else return QUEUED;
+            }else{ //not a building training a unit
+                return Tools::TrainUnit(bq.next);
+            }
+                
+    }else{
+        return NOT_ENOUGH_RESOURCES; //wait until we have more money/ supply or bq changes
+        //bq is supposed to know if we are supply blocked this shit just waits (e.g. if pylon is under construction)
+    }
+
 }

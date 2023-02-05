@@ -1,4 +1,5 @@
 #include "Tools.h"
+#include "StarterBot.h"
 
 BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units)
 {
@@ -77,6 +78,29 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
     return builder->build(type, buildPos);
 }
+
+BuildResult Tools::TrainUnit(BWAPI::UnitType type){
+
+    //GETTING SOURCE BUILDING IGNORING ARCHONS for now
+    BWAPI::UnitType trainerType = type.whatBuilds().first;
+
+    //do we have it if so pick one randomly 
+    //TODO rewrite get unit of type
+    BWAPI::Unit trainer = Tools::GetUnitOfType(trainerType); 
+
+    if(trainer = nullptr) return NO_TRAINER;
+
+    if (trainer && !trainer->isTraining()){
+        if (trainer->train(type)){
+            return QUEUED;
+        }else return FAILED;
+    }else{
+        return QUEUE_FULL;
+    }
+
+}
+
+
 
 void Tools::DrawUnitCommands()
 {

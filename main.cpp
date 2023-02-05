@@ -53,8 +53,8 @@ int main(int argc, char * argv[])
 
 void PlayGame()
 {
-    StarterBot bot;
-
+    StarterBot *bot = new StarterBot();
+    
     // The main game loop, which continues while we are connected to BWAPI and in a game
     while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame())
     {
@@ -63,17 +63,17 @@ void PlayGame()
         {
             switch (e.getType())
             {
-                case BWAPI::EventType::MatchStart:   { bot.onStart();                       break; }
-                case BWAPI::EventType::MatchFrame:   { bot.onFrame();                       break; }
-                case BWAPI::EventType::MatchEnd:     { bot.onEnd(e.isWinner());             break; }
-                case BWAPI::EventType::UnitShow:     { bot.onUnitShow(e.getUnit());         break; }
-                case BWAPI::EventType::UnitHide:     { bot.onUnitHide(e.getUnit());         break; }
-                case BWAPI::EventType::UnitCreate:   { bot.onUnitCreate(e.getUnit());       break; }
-                case BWAPI::EventType::UnitMorph:    { bot.onUnitMorph(e.getUnit());        break; }
-                case BWAPI::EventType::UnitDestroy:  { bot.onUnitDestroy(e.getUnit());      break; }
-                case BWAPI::EventType::UnitRenegade: { bot.onUnitRenegade(e.getUnit());     break; }
-                case BWAPI::EventType::UnitComplete: { bot.onUnitComplete(e.getUnit());     break; }
-                case BWAPI::EventType::SendText:     { bot.onSendText(e.getText());         break; }
+                case BWAPI::EventType::MatchStart:   { bot->onStart();                       break; }
+                case BWAPI::EventType::MatchFrame:   { bot->onFrame();                       break; }
+                case BWAPI::EventType::MatchEnd:     { bot->onEnd(e.isWinner());             break; }
+                case BWAPI::EventType::UnitShow:     { bot->onUnitShow(e.getUnit());         break; }
+                case BWAPI::EventType::UnitHide:     { bot->onUnitHide(e.getUnit());         break; }
+                case BWAPI::EventType::UnitCreate:   { bot->onUnitCreate(e.getUnit());       break; }
+                case BWAPI::EventType::UnitMorph:    { bot->onUnitMorph(e.getUnit());        break; }
+                case BWAPI::EventType::UnitDestroy:  { bot->onUnitDestroy(e.getUnit());      break; }
+                case BWAPI::EventType::UnitRenegade: { bot->onUnitRenegade(e.getUnit());     break; }
+                case BWAPI::EventType::UnitComplete: { bot->onUnitComplete(e.getUnit());     break; }
+                case BWAPI::EventType::SendText:     { bot->onSendText(e.getText());         break; }
             }
         }
 
@@ -86,6 +86,8 @@ void PlayGame()
     }
 
     std::cout << "Game Over\n";
+    delete bot;
+    return;
 }
 
 void ParseReplay()

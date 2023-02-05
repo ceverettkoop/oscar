@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "StarterBot.h"
 
 namespace Tools
 {
@@ -13,6 +14,7 @@ namespace Tools
     BWAPI::Unit GetDepot();
 
     bool BuildBuilding(BWAPI::UnitType type);
+    BuildResult TrainUnit(BWAPI::UnitType type);
 
     void DrawUnitBoundingBoxes();
     void DrawUnitCommands();
