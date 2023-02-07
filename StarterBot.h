@@ -37,6 +37,7 @@ public:
 
 	//functions
 	BWAPI::UnitType nextStep(int supplyCount, int* targetCount);
+	int DesiredCountAlreadyBuilt(BWAPI::UnitType type);
 
 };
 

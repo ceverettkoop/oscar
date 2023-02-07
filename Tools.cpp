@@ -88,9 +88,9 @@ BuildResult Tools::TrainUnit(BWAPI::UnitType type){
     //TODO rewrite get unit of type
     BWAPI::Unit trainer = Tools::GetUnitOfType(trainerType); 
 
-    if(trainer = nullptr) return NO_TRAINER;
+    if(trainer == nullptr) return NO_TRAINER;
 
-    if (trainer && !trainer->isTraining()){
+    if (!trainer->isTraining()){
         if (trainer->train(type)){
             return QUEUED;
         }else return FAILED;

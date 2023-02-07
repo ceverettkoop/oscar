@@ -43,10 +43,10 @@ void StarterBot::onFrame()
     //buildAdditionalSupply();
 
     // Draw unit health bars, which brood war unfortunately does not do
-    Tools::DrawUnitHealthBars();
+    //Tools::DrawUnitHealthBars();
 
     // Draw some relevent information to the screen to help us debug the bot
-    drawDebugInformation();
+    //drawDebugInformation();
 }
 
 // Send our idle workers to mine minerals so they don't just stand there
