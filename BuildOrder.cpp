@@ -27,7 +27,7 @@ BWAPI::UnitType InitialBuildOrder::nextStep(int supplyCount, int* targetCount){
 //take a file of integers seperated by space or newline of the format:
 //supplycount unittype \n supplycount unittype etc etc
 //returns -1 on failure otherwise returns # of steps found in build order
-int InitialBuildOrder::load_ibo(char* path){
+int InitialBuildOrder::load_ibo(const char* path){
 
     std::ifstream infile (path);
     std::string instring;

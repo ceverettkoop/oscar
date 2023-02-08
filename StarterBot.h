@@ -28,7 +28,7 @@ public:
 	
 	int stepCount = 0;
 	bool isFinished = false;
-	int load_ibo(char* path);
+	int load_ibo(const char* path);
 	StarterBot *const bot;
 	
 	//constructor w reference to parent bot

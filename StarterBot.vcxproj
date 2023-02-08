@@ -57,7 +57,7 @@
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -113,10 +113,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
-    <LibraryPath>$(SolutionDir)\$(Platform)\$(Configuration)\BWAPI;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\..\bin\ </OutDir>
-    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <LibraryPath>$(SolutionDir)\..\include\;$(SolutionDir)\$(Platform)\$(Configuration)\BWAPI;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\bin\ms\</OutDir>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>dumbbot</TargetName>
+    <IncludePath>$(SolutionDir)\..\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <GenerateManifest>false</GenerateManifest>
@@ -126,9 +127,11 @@
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>$(SolutionDir)\$(Platform)\$(Configuration)\BWAPI;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\..\bin\</OutDir>
-    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <LibraryPath>$(SolutionDir)\..\lib;$(SolutionDir)\$(Platform)\$(Configuration)\BWAPI;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\bin\ms\</OutDir>
+    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\..\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(SolutionDir)\$(Platform)\$(Configuration)\BWAPI;$(LibraryPath)</LibraryPath>

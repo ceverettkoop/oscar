@@ -32,4 +32,9 @@ obj/*.obj
 *.exe
 *.out
 *.app
+*.o
+
+
 obj/main.o
+.vs/*
+obj/*

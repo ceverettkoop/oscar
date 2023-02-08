@@ -1,0 +1,38 @@
+{
+    "solution": "${workspaceRoot}/StarterBot.sln",
+    "variables": {
+        "MSBUILD": "MSBuild",
+        "DEVENV": "devenv"
+    },
+    "buildConfigurations": [
+        "Debug",
+        "Release"
+    ],
+    "platformConfigurations": [
+        "x86"
+    ],
+    "preBuildTasks": [
+        {
+            "name": "Print a message",
+            "program": "cmd",
+            "args": [ "/c", "echo [pre-build task]: MESSAGE" ],
+            "cwd": "${workspaceRoot}"
+        }
+    ],
+    "postBuildTasks": [
+        {
+            "name": "Print another message",
+            "program": "cmd",
+            "args": [ "/c", "echo [post-build task]: ANOTHER MESSAGE" ],
+            "cwd": "${workspaceRoot}"
+        }
+    ],
+    "debugConfigurations": [
+        {
+            "name": "test",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/x64/${buildConfig}/helloworld.exe",
+            "args": []
+        }
+    ]
+}
