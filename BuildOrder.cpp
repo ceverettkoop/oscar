@@ -1,6 +1,7 @@
 #include "StarterBot.h"
 #include <BWAPI.h>
 #include <fstream>
+#include "Tools.h"
 
 
 BWAPI::UnitType InitialBuildOrder::nextStep(int supplyCount, int* targetCount){
@@ -27,7 +28,7 @@ BWAPI::UnitType InitialBuildOrder::nextStep(int supplyCount, int* targetCount){
 //take a file of integers seperated by space or newline of the format:
 //supplycount unittype \n supplycount unittype etc etc
 //returns -1 on failure otherwise returns # of steps found in build order
-int InitialBuildOrder::load_ibo(const char* path){
+int InitialBuildOrder::load_ibo(char* path){
 
     std::ifstream infile (path);
     std::string instring;
@@ -92,7 +93,7 @@ int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
 }
 
 //update queue, taking into account of last attempt to build queued unit
-void BuildQueue::updateQueue(BuildResult lastResult){
+void BuildQueue::updateQueue(){
     int targetCount = 0;
     if(bot->ibo.isFinished) onIbo = false; //only leaves ibo if over; will add other conditions
     
@@ -114,11 +115,23 @@ void BuildQueue::updateQueue(BuildResult lastResult){
             }else{
                 next = BWAPI::Broodwar->self()->getRace().getWorker();
             }
-            
+        }
+    }else{ //we are off book so just build zealots and probes unless within 2 points of being supply blocked
+        int totalSupply = Tools::GetTotalSupply(true); //incl under construction
+        if( (BWAPI::Broodwar->self()->supplyUsed() + 1) >= BWAPI::Broodwar->self()->supplyTotal()){
+            next = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+            return;
+        }else{
+            //try to build a zealot unless are all queued up then build a probe
+            if (!(lastAttempt == BWAPI::UnitTypes::Protoss_Zealot && lastResult == QUEUE_FULL)){
+                next = BWAPI::UnitTypes::Protoss_Zealot;
+            }else{
+                next = BWAPI::Broodwar->self()->getRace().getWorker();
+            }
 
         }
 
-        
+
     }
 
 }

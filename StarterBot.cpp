@@ -1,6 +1,14 @@
+#ifndef OS //if compiling not on windows
+#include <unistd.h>
+#else
+#include <direct.h>
+#endif
+
+#include <cstring>
 #include "StarterBot.h"
 #include "Tools.h"
 #include "MapTools.h"
+
 
 StarterBot::StarterBot()
 {
@@ -21,7 +29,16 @@ void StarterBot::onStart()
     m_mapTools.onStart();
 
     //load ibo (TODO make path relative; load multiple ibos etc)
-    ibo.load_ibo("/home/sean/development/starterbot/resources/2gatewaypvz");
+    char path[512];
+    #ifndef OS
+    getcwd(path, 400);
+    #else
+    _getcwd(path, 200);
+    #endif
+    strncat(path,"/bwapi-data/read/2gatewaypvz", 111);
+    fprintf(stderr,"IBO path is %s\n", path);
+
+    ibo.load_ibo(path);
 }
 
 // Called on each frame of the game
@@ -176,11 +193,10 @@ void StarterBot::onUnitRenegade(BWAPI::Unit unit)
 	
 }
 
-//Build next item in queue. 
-int StarterBot::buildNext(){
+//Build next item in queue and tell the bq if it worked
+void StarterBot::buildNext(){
 
-    //later make this conditional on prev result
-    bq.updateQueue(FAILED);
+    bq.updateQueue();
     
     //first see if we have enough money and supply
     //if bq say it's next we just have to wait otherwise, bq contains logic to change plan
@@ -188,15 +204,20 @@ int StarterBot::buildNext(){
         bq.next.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
         bq.next.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed())){
             if(bq.next.isBuilding()){
-                if(!Tools::BuildBuilding(bq.next)) return FAILED; //TODO edit function to return result
-                else return QUEUED;
+                if(!Tools::BuildBuilding(bq.next)){
+                    bq.lastResult = FAILED; //TODO edit function to return result
+                } 
+                else bq.lastResult =  QUEUED;
             }else{ //not a building training a unit
-                return Tools::TrainUnit(bq.next);
+                bq.lastResult =  Tools::TrainUnit(bq.next);
             }
                 
     }else{
-        return NOT_ENOUGH_RESOURCES; //wait until we have more money/ supply or bq changes
+        bq.lastResult =  NOT_ENOUGH_RESOURCES; //wait until we have more money/ supply or bq changes
         //bq is supposed to know if we are supply blocked this shit just waits (e.g. if pylon is under construction)
     }
+
+    bq.lastAttempt = bq.next;
+    return;
 
 }

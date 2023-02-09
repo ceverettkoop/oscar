@@ -94,7 +94,8 @@ BuildResult Tools::TrainUnit(BWAPI::UnitType type){
         if (trainer->train(type)){
             return QUEUED;
         }else return FAILED;
-    }else{
+    }else{ // if queue full look for another
+
         return QUEUE_FULL;
     }
 

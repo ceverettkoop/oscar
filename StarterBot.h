@@ -28,7 +28,7 @@ public:
 	
 	int stepCount = 0;
 	bool isFinished = false;
-	int load_ibo(const char* path);
+	int load_ibo(char* path);
 	StarterBot *const bot;
 	
 	//constructor w reference to parent bot
@@ -48,12 +48,14 @@ public:
 	BWAPI::UnitType next; //next thing to build, currently one at a time
 	bool onIbo = true;
 	StarterBot* const bot;
+	BuildResult lastResult;
+	BWAPI::UnitType lastAttempt;
 
 	//constructor w reference to parent bot
 	BuildQueue(StarterBot* const inbot):bot(inbot){}
 	StarterBot* getBot(){return bot;}
 	
-	void updateQueue(BuildResult lastResult);
+	void updateQueue();
 
 
 
@@ -73,7 +75,7 @@ public:
     StarterBot();
 
     //my functions to have bot do stuff (bot thinking elsewhere)
-	int buildNext();
+	void buildNext();
 	
 	// helper functions to get you started with bot programming and learn the API
     void sendIdleWorkersToMinerals();
