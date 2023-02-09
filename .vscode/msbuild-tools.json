@@ -1,15 +1,16 @@
 {
     "solution": "${workspaceRoot}/StarterBot.sln",
     "variables": {
-        "MSBUILD": "MSBuild",
-        "DEVENV": "devenv"
+        "MSBUILD": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe",
+        "DEVENV": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.com"
     },
     "buildConfigurations": [
         "Debug",
         "Release"
     ],
     "platformConfigurations": [
-        "x86"
+        "x86",
+        "x64"
     ],
     "preBuildTasks": [
         {
@@ -23,16 +24,17 @@
         {
             "name": "Print another message",
             "program": "cmd",
-            "args": [ "/c", "echo [post-build task]: ANOTHER MESSAGE" ],
+            "args": [ "/c", "echo [post-build task]: DLL BUILT" ],
             "cwd": "${workspaceRoot}"
         }
     ],
     "debugConfigurations": [
         {
             "name": "test",
-            "cwd": "${workspaceRoot}",
-            "program": "${workspaceRoot}/x64/${buildConfig}/helloworld.exe",
-            "args": []
+            "cwd": "${workspaceRoot}/../StarCraft",
+            "program": "C:/Users/sean/BWAPI/Starcraft/injectory_x86.exe",
+            "args": ["--launch", "StarCraft.exe", "--inject", "bwapi-data/BWAPI.dll", "wmode.dll"]
+
         }
     ]
 }
