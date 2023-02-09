@@ -1,4 +1,4 @@
-#ifndef OS //if compiling not on windows
+#ifndef WIN32 //if compiling not on windows
 #include <unistd.h>
 #else
 #include <direct.h>
@@ -30,7 +30,7 @@ void StarterBot::onStart()
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
-    #ifndef OS
+    #ifndef WIN32
     getcwd(path, 400);
     #else
     _getcwd(path, 200);
