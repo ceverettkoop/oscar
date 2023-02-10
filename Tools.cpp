@@ -52,6 +52,7 @@ BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
     return nullptr;
 }
 
+
 BWAPI::Unit Tools::GetDepot()
 {
     const BWAPI::UnitType depot = BWAPI::Broodwar->self()->getRace().getResourceDepot();
@@ -83,22 +84,28 @@ BuildResult Tools::TrainUnit(BWAPI::UnitType type){
 
     //GETTING SOURCE BUILDING IGNORING ARCHONS for now
     BWAPI::UnitType trainerType = type.whatBuilds().first;
+    std::vector<BWAPI::Unit> trainerSet;
 
-    //do we have it if so pick one randomly 
-    //TODO rewrite get unit of type
-    BWAPI::Unit trainer = Tools::GetUnitOfType(trainerType); 
-
-    if(trainer == nullptr) return NO_TRAINER;
-
-    if (!trainer->isTraining()){
-        if (trainer->train(type)){
-            return QUEUED;
-        }else return FAILED;
-    }else{ // if queue full look for another
-
-        return QUEUE_FULL;
+    // For each unit that we own
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        // if the unit is of the correct type and it actually has been constructed, add it to set
+        if (unit->getType() == trainerType && unit->isCompleted()){
+            trainerSet.push_back(unit);
+        }
     }
 
+    if(trainerSet.size() == 0) return NO_TRAINER;
+
+    for (size_t i = 0; i < trainerSet.size(); i++){
+        if (!trainerSet[0]->isTraining()){
+            if (trainerSet[0]->train(type)){
+                return QUEUED; //success
+            }else return FAILED; //failed for some reason
+        }
+    }
+
+    return QUEUE_FULL; //presumably all trainers full
+    
 }
 
 

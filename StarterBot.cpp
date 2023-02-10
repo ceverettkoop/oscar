@@ -63,7 +63,7 @@ void StarterBot::onFrame()
     //Tools::DrawUnitHealthBars();
 
     // Draw some relevent information to the screen to help us debug the bot
-    //drawDebugInformation();
+    drawDebugInformation();
 }
 
 // Send our idle workers to mine minerals so they don't just stand there
@@ -125,7 +125,8 @@ void StarterBot::buildAdditionalSupply()
 // Draw some relevent information to the screen to help us debug the bot
 void StarterBot::drawDebugInformation()
 {
-    BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
+    BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n"
+    , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), BWAPI::Broodwar->self()->supplyUsed(), BWAPI::Broodwar->self()->supplyTotal()     );
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
 }
