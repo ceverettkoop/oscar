@@ -126,7 +126,7 @@ void StarterBot::buildAdditionalSupply()
 void StarterBot::drawDebugInformation()
 {
     BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n"
-    , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), BWAPI::Broodwar->self()->supplyUsed(), BWAPI::Broodwar->self()->supplyTotal()     );
+    , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), ( BWAPI::Broodwar->self()->supplyUsed() / 2), (BWAPI::Broodwar->self()->supplyTotal() / 2) );
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
 }

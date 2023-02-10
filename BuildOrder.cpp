@@ -118,7 +118,7 @@ void BuildQueue::updateQueue(){
         }
     }else{ //we are off book so just build zealots and probes unless within 2 points of being supply blocked
         int totalSupply = Tools::GetTotalSupply(true); //incl under construction
-        if( (BWAPI::Broodwar->self()->supplyUsed() + 4) >= BWAPI::Broodwar->self()->supplyTotal()){
+        if( (BWAPI::Broodwar->self()->supplyUsed() + 4) >= totalSupply){
             next = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
             return;
         }else{
