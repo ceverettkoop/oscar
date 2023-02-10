@@ -84,21 +84,21 @@ BuildResult Tools::TrainUnit(BWAPI::UnitType type){
 
     //GETTING SOURCE BUILDING IGNORING ARCHONS for now
     BWAPI::UnitType trainerType = type.whatBuilds().first;
-    std::vector<BWAPI::Unit> trainerSet;
+    BWAPI::Unitset trainerSet;
 
     // For each unit that we own
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
         // if the unit is of the correct type and it actually has been constructed, add it to set
         if (unit->getType() == trainerType && unit->isCompleted()){
-            trainerSet.push_back(unit);
+            trainerSet.insert(unit);
         }
     }
 
     if(trainerSet.size() == 0) return NO_TRAINER;
 
-    for (size_t i = 0; i < trainerSet.size(); i++){
-        if (!trainerSet[0]->isTraining()){
-            if (trainerSet[0]->train(type)){
+    for (auto& trainer : trainerSet){
+        if (!trainer->isTraining()){
+            if (trainer->train(type)){
                 return QUEUED; //success
             }else return FAILED; //failed for some reason
         }
