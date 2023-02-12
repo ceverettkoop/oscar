@@ -125,10 +125,22 @@ void StarterBot::buildAdditionalSupply()
 // Draw some relevent information to the screen to help us debug the bot
 void StarterBot::drawDebugInformation()
 {
-    BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n"
-    , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), ( BWAPI::Broodwar->self()->supplyUsed() / 2), (BWAPI::Broodwar->self()->supplyTotal() / 2) );
+    char format[1024] = "";
+    char digit[4] = "";
+    for(int i = 0; i < bq.next.size(); i++){
+        snprintf(digit, 3, "%d ", i);        
+        strcat(format, digit);
+        strncat(format, bq.next[i].type.getName().c_str(), 63); 
+        strncat(format,"\n", 2);
+    }
+    BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n%s\n"
+    , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), ( BWAPI::Broodwar->self()->supplyUsed() / 2), 
+    (BWAPI::Broodwar->self()->supplyTotal() / 2), format );
+
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
+
+
 }
 
 // Called whenever the game ends and tells you if you won or not
