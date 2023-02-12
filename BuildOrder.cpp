@@ -40,6 +40,7 @@ int InitialBuildOrder::load_ibo(char* path){
     if(infile.is_open()){
         while (infile.good()){
             inchar = infile.get();
+            if (inchar == '#') break; //indicates end of ibo at #
             if( inchar != ' ' && inchar != '\n'){
                 instring += inchar;
             }else{ //presumably we have an int
@@ -95,6 +96,7 @@ int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
 //update queue, taking into account of last attempt to build queued unit
 void BuildQueue::updateQueue(){
     int targetCount = 0;
+    BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
     if(bot->ibo.isFinished) onIbo = false; //only leaves ibo if over; will add other conditions
     
     //logic for initial build order 
@@ -102,7 +104,7 @@ void BuildQueue::updateQueue(){
         BWAPI::UnitType rec = bot->ibo.nextStep(BWAPI::Broodwar->self()->supplyUsed(), &targetCount);
         
         if(!rec.isBuilding()){ // if we have a unit pass it
-            next = rec;
+            next[0].type = rec;
         }else{ //otherwise check if we have built as many as prescribed already per ibo
             const BWAPI::Unitset& units = BWAPI::Broodwar->self()->getUnits();
             int builtCount = 0;
@@ -110,29 +112,83 @@ void BuildQueue::updateQueue(){
                 if(unit->getType() == rec) builtCount++;
             }
             if (builtCount < bot->ibo.DesiredCountAlreadyBuilt(rec)){
-                next = rec;
+                next[0].type = rec;
                 return;
             }else{
-                next = BWAPI::Broodwar->self()->getRace().getWorker();
+                next[0].type = worker;
+                return;
             }
         }
-    }else{ //we are off book so just build zealots and probes unless within 2 points of being supply blocked
+    }else{ //past ibo behavior now using more queue slots
+
+        BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+        int supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
+        int droneCount = Tools::CountUnitsOfType(worker, BWAPI::Broodwar->self()->getUnits());
+
+        //are we supply blocked
         int totalSupply = Tools::GetTotalSupply(true); //incl under construction
-        if( (BWAPI::Broodwar->self()->supplyUsed() + 4) >= totalSupply){
-            next = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-            return;
-        }else{
-            //try to build a zealot unless are all queued up then build a probe
-            if (!(lastAttempt == BWAPI::UnitTypes::Protoss_Zealot && lastResult == QUEUE_FULL)){
-                next = BWAPI::UnitTypes::Protoss_Zealot;
-            }else{
-                next = BWAPI::Broodwar->self()->getRace().getWorker();
+        if( (supplyUsed + 4) >= totalSupply){
+            //is there a pylon in the queue
+            bool buildingPylon = false;
+            for (size_t i = 0; i < next.size(); i++){
+                if (next[i].type == pylon ) buildingPylon = true;
             }
+            next.insert(next.begin(),QueueEntry(pylon));
+        }else{
+            //if we're not supply blocked first take pylon out of the queue
+            for (int i = 0; i < next.size(); i++){
+                if (next[i].type == pylon){
+                    next.erase(next.begin() + i);
+                }
+            }
+        
+            BuildGoal goal = GetGoal(supplyUsed, droneCount, baseCount);
 
+            switch(goal){
+
+                case BUILD_ZEALOTS:
+                    bool buildingZealot = false; 
+                    for (size_t i = 0; i < next.size(); i++){
+                        if (next[i].type == BWAPI::UnitTypes::Protoss_Zealot ) buildingZealot = true;
+                    }
+                    if (!buildingZealot) next.push_back(QueueEntry(BWAPI::UnitTypes::Protoss_Zealot));
+                    break;
+            }
+            
         }
 
+        //drone build queue management
+        bool buildingDrone = false;
+        bool needDrones = (droneCount < 40);
+        for (size_t i = 0; i < next.size(); i++){
+            if (next[i].type == worker ) buildingDrone = true;
+        }
+        if (needDrones && !buildingDrone) next.insert(next.begin(),QueueEntry(worker));
+        else if (!needDrones && buildingDrone){
+            for (int i = 0; i < next.size(); i++){
+                if (next[i].type == pylon){
+                    next.erase(next.begin() + i);
+                }
+            }
+        }
 
+        //clean up; if queue is empty give it one blank element
+        if (next.size() == 0) next.push_back(QueueEntry());
+    
     }
+
+}
+
+BuildGoal BuildQueue::GetGoal(int supplyUsed, int droneCount, int baseCount){
+
+    int boSupply = supplyUsed / 2;
+    //inline for now will append to IBO later;
+    if(boSupply < 30){
+        return BUILD_ZEALOTS;
+    }else if (baseCount < 2 ){
+        return BUILD_ZEALOTS; //this will be expand later
+    }else 
+        return BUILD_ZEALOTS;
 
 }
 

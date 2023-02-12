@@ -13,6 +13,14 @@ enum BuildResult{
     FAILED
 };
 
+enum BuildGoal{
+	BUILD_DRONES,
+	EXPAND,
+	BUILD_ZEALOTS,
+	BUILD_DRAGOONS,
+	BUILD_FORGE
+};
+
 class StarterBot;
 
 
@@ -23,7 +31,6 @@ private:
 	std::vector<int> ibo_supplyCount; //requisite count to build unit or struct at i
 	std::vector<BWAPI::UnitType> ibo_unitType; //type of unit to build
 	
-
 public:
 	
 	int stepCount = 0;
@@ -41,22 +48,43 @@ public:
 
 };
 
+
+class QueueEntry{
+
+public:
+	
+	BWAPI::UnitType type = BWAPI::UnitTypes::None;
+	BuildResult lastResult = NODATA;
+	BWAPI::UnitType lastAttempt = BWAPI::UnitTypes::None;
+
+	QueueEntry(){};
+	
+	QueueEntry(BWAPI::UnitType input){
+		type = input;
+	}
+
+};
+
+
 class BuildQueue{
+
 
 public:
 
-	BWAPI::UnitType next; //next thing to build, currently one at a time
+	int baseCount = 1;
+	static const int maxSize = 5;
+	std::vector<QueueEntry> next; //types of things we are currently trying to build
 	bool onIbo = true;
 	StarterBot* const bot;
-	BuildResult lastResult;
-	BWAPI::UnitType lastAttempt;
 
 	//constructor w reference to parent bot
-	BuildQueue(StarterBot* const inbot):bot(inbot){}
+	BuildQueue(StarterBot* const inbot):bot(inbot){
+		next.push_back(QueueEntry()); //put in one entry
+	}
 	StarterBot* getBot(){return bot;}
 	
 	void updateQueue();
-
+	BuildGoal GetGoal(int supplyUsed, int droneCount, int baseCount);
 
 
 };

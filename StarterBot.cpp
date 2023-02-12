@@ -194,31 +194,40 @@ void StarterBot::onUnitRenegade(BWAPI::Unit unit)
 	
 }
 
-//Build next item in queue and tell the bq if it worked
+//Build next item(s) in queue and tell the bq if it worked
 void StarterBot::buildNext(){
 
     bq.updateQueue();
-    
-    //first see if we have enough money and supply
-    //if bq say it's next we just have to wait otherwise, bq contains logic to change plan
-    if( bq.next.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
-        bq.next.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
-        bq.next.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed())){
-            if(bq.next.isBuilding()){
-                if(!Tools::BuildBuilding(bq.next)){
-                    bq.lastResult = FAILED; //TODO edit function to return result
-                } 
-                else bq.lastResult =  QUEUED;
-            }else{ //not a building training a unit
-                bq.lastResult =  Tools::TrainUnit(bq.next);
+
+    for (size_t i = 0; i < bq.next.size(); i++){
+        if (bq.next[i].type == BWAPI::UnitTypes::None){
+                if (i == 0){  //0 should always have one type, rest may be blank
+                    fprintf(stderr, "ERROR: No unit in bq\n");
+                    break;
+                }else break;
             }
-                
-    }else{
-        bq.lastResult =  NOT_ENOUGH_RESOURCES; //wait until we have more money/ supply or bq changes
-        //bq is supposed to know if we are supply blocked this shit just waits (e.g. if pylon is under construction)
+
+        //trying to check if we can build it
+        if( bq.next[i].type.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
+            bq.next[i].type.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
+            bq.next[i].type.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed())){
+                if(bq.next[i].type.isBuilding()){
+                    if(!Tools::BuildBuilding(bq.next[i].type)){
+                        bq.next[i].lastResult = FAILED;
+                    } 
+                    else bq.next[i].lastResult =  QUEUED;
+                }else{ //not a building training a unit
+                    bq.next[i].lastResult =  Tools::TrainUnit(bq.next[i].type);
+                }
+                    
+        }else{
+            bq.next[i].lastResult =  NOT_ENOUGH_RESOURCES; //wait until we have more money/ supply or bq changes
+            //bq is supposed to know if we are supply blocked
+        }
+
+        bq.next[i].lastAttempt = bq.next[i].type;
     }
 
-    bq.lastAttempt = bq.next;
     return;
-
+    
 }
