@@ -54,8 +54,11 @@ class QueueEntry{
 public:
 	
 	BWAPI::UnitType type = BWAPI::UnitTypes::None;
-	BuildResult lastResult = NODATA;
-	BWAPI::UnitType lastAttempt = BWAPI::UnitTypes::None;
+	int countWantedNow = -1; //-1 means not tracking
+	int countBuiltNow = 0; //count built on this iteration, when count wanted equals count built reset
+	int countWantedTotal = -1; //-1 means not tracking
+	int countBuiltTotal = 0; //retrieve periodically
+	int buildQty = 0;
 
 	QueueEntry(){};
 	
@@ -84,7 +87,14 @@ public:
 	StarterBot* getBot(){return bot;}
 	
 	void updateQueue();
+	int updateQty(int index);
 	BuildGoal GetGoal(int supplyUsed, int droneCount, int baseCount);
+	void addEntryNow(int count, BWAPI::UnitType type);
+	void addEntryTotal(int count, BWAPI::UnitType type);
+	void rmEntry(BWAPI::UnitType type);
+	//TODO add a way to adjust priorities easily
+	//void entryToFront(BWAPI::UnitType type); 
+	//void entryToBack(BWAPI::UnitType type);
 
 
 };
@@ -93,7 +103,6 @@ public:
 class StarterBot : public BWAPI::AIModule
 {
     MapTools m_mapTools;
-
 
 public:
 

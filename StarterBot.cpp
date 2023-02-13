@@ -123,15 +123,15 @@ void StarterBot::buildAdditionalSupply()
 }
 
 // Draw some relevent information to the screen to help us debug the bot
-void StarterBot::drawDebugInformation()
-{
-    char format[1024] = "";
-    char digit[4] = "";
+void StarterBot::drawDebugInformation(){
+
+    char format[1024] = "Current build priority:\n";
+    char qty[16] = "";
     for(int i = 0; i < bq.next.size(); i++){
-        snprintf(digit, 3, "%d ", i);        
-        strcat(format, digit);
+        snprintf(qty, 15, " x %d\n", bq.next[i].buildQty);
         strncat(format, bq.next[i].type.getName().c_str(), 63); 
-        strncat(format,"\n", 2);
+        strcat(format, qty);
+        if (strlen(format) > 943) break; //overflow protection
     }
     BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n%s\n"
     , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), ( BWAPI::Broodwar->self()->supplyUsed() / 2), 
@@ -139,7 +139,6 @@ void StarterBot::drawDebugInformation()
 
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
-
 
 }
 
@@ -206,38 +205,43 @@ void StarterBot::onUnitRenegade(BWAPI::Unit unit)
 	
 }
 
-//Build next item(s) in queue and tell the bq if it worked
+//Iterate through entries in building queue and build we are supposed to build
 void StarterBot::buildNext(){
 
     bq.updateQueue();
 
-    for (size_t i = 0; i < bq.next.size(); i++){
-        if (bq.next[i].type == BWAPI::UnitTypes::None){
-                if (i == 0){  //0 should always have one type, rest may be blank
-                    fprintf(stderr, "ERROR: No unit in bq\n");
-                    break;
-                }else break;
-            }
+    for (int i = 0; i < bq.next.size(); i++){
+        
+        BWAPI::UnitType nextUnit = bq.next[i].type;
+        
+        bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
+            nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
+            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed()));
 
-        //trying to check if we can build it
-        if( bq.next[i].type.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
-            bq.next[i].type.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
-            bq.next[i].type.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed())){
-                if(bq.next[i].type.isBuilding()){
-                    if(!Tools::BuildBuilding(bq.next[i].type)){
-                        bq.next[i].lastResult = FAILED;
-                    } 
-                    else bq.next[i].lastResult =  QUEUED;
-                }else{ //not a building training a unit
-                    bq.next[i].lastResult =  Tools::TrainUnit(bq.next[i].type);
-                }
+        int countToBuild = 0;
+
+        if(canAfford){
+            bq.onIbo ? countToBuild = 1 : countToBuild = bq.updateQty(i); //if on ibo queue one, otherwise check how many
+
+            if( countToBuild || bq.onIbo){ //check if counts for this entry make sense or we're on ibo 
+                if(nextUnit.isBuilding()){
+                    for (int n = 0; n < countToBuild; ++n){
+                        if(Tools::BuildBuilding(nextUnit)) bq.next[i].countBuiltNow++;
+                    }
                     
-        }else{
-            bq.next[i].lastResult =  NOT_ENOUGH_RESOURCES; //wait until we have more money/ supply or bq changes
-            //bq is supposed to know if we are supply blocked
+                }else{
+                    for (int n = 0; n < countToBuild; ++n){
+                        if(Tools::TrainUnit(nextUnit) == QUEUED) bq.next[i].countBuiltNow++;
+                    }
+                }
+            }
         }
 
-        bq.next[i].lastAttempt = bq.next[i].type;
+        if (bq.onIbo){
+            bq.next[i].buildQty = 1;
+            return;
+        }  //we're done after first element if on ibo
+
     }
 
     return;

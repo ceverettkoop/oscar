@@ -105,6 +105,7 @@ void BuildQueue::updateQueue(){
         
         if(!rec.isBuilding()){ // if we have a unit pass it
             next[0].type = rec;
+            
         }else{ //otherwise check if we have built as many as prescribed already per ibo
             const BWAPI::Unitset& units = BWAPI::Broodwar->self()->getUnits();
             int builtCount = 0;
@@ -125,60 +126,42 @@ void BuildQueue::updateQueue(){
         int supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
         int droneCount = Tools::CountUnitsOfType(worker, BWAPI::Broodwar->self()->getUnits());
 
-        //are we supply blocked
+        //PYLON QUEUE (should work for other supply too)
+        //are we supply blocked add 1 pylon to queue
         int totalSupply = Tools::GetTotalSupply(true); //incl under construction
         if( (supplyUsed + 4) >= totalSupply){
-            //is there a pylon in the queue
-            bool buildingPylon = false;
-            for (size_t i = 0; i < next.size(); i++){
-                if (next[i].type == pylon ) buildingPylon = true;
-            }
-            next.insert(next.begin(),QueueEntry(pylon));
-        }else{
-            //if we're not supply blocked first take pylon out of the queue
-            for (int i = 0; i < next.size(); i++){
-                if (next[i].type == pylon){
-                    next.erase(next.begin() + i);
-                }
-            }
+            addEntryNow(1, pylon);
+        }
+
+        //DRONE QUEUE
+            addEntryTotal(40, worker);
+
+        //ZEALOT QUEUE
+            addEntryTotal(40, BWAPI::UnitTypes::Protoss_Zealot);
+
+    }
+
         
-            BuildGoal goal = GetGoal(supplyUsed, droneCount, baseCount);
+//skippin goal nonsense for now      
+/*        BuildGoal goal = GetGoal(supplyUsed, droneCount, baseCount);
+            
+        switch(goal){ //goal busted maybe will get canned
 
-            switch(goal){
-
-                case BUILD_ZEALOTS:
-                    bool buildingZealot = false; 
-                    for (size_t i = 0; i < next.size(); i++){
-                        if (next[i].type == BWAPI::UnitTypes::Protoss_Zealot ) buildingZealot = true;
-                    }
-                    if (!buildingZealot) next.push_back(QueueEntry(BWAPI::UnitTypes::Protoss_Zealot));
-                    break;
+            case BUILD_ZEALOTS:
+                bool buildingZealot = false; 
+                for (size_t i = 0; i < next.size(); i++){
+                    if (next[i].type == BWAPI::UnitTypes::Protoss_Zealot ) buildingZealot = true;
+                }
+                if (!buildingZealot) next.push_back(QueueEntry(BWAPI::UnitTypes::Protoss_Zealot));
+                break;
             }
             
         }
-
-        //drone build queue management
-        bool buildingDrone = false;
-        bool needDrones = (droneCount < 40);
-        for (size_t i = 0; i < next.size(); i++){
-            if (next[i].type == worker ) buildingDrone = true;
-        }
-        if (needDrones && !buildingDrone) next.insert(next.begin(),QueueEntry(worker));
-        else if (!needDrones && buildingDrone){
-            for (int i = 0; i < next.size(); i++){
-                if (next[i].type == pylon){
-                    next.erase(next.begin() + i);
-                }
-            }
-        }
-
-        //clean up; if queue is empty give it one blank element
-        if (next.size() == 0) next.push_back(QueueEntry());
-    
-    }
+*/
 
 }
 
+//this does nothing rn
 BuildGoal BuildQueue::GetGoal(int supplyUsed, int droneCount, int baseCount){
 
     int boSupply = supplyUsed / 2;
@@ -191,4 +174,89 @@ BuildGoal BuildQueue::GetGoal(int supplyUsed, int droneCount, int baseCount){
         return BUILD_ZEALOTS;
 
 }
+
+void BuildQueue::addEntryNow(int count, BWAPI::UnitType type){
+
+    bool typeExists = false;
+    
+    //if type already in queue reset count wanted and built
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].type){
+            typeExists = true; 
+            next[i].countWantedNow = count;
+            next[i].countBuiltNow = 0;            
+        }     
+    }
+
+    //else create it
+    if (!typeExists){
+        next.push_back(QueueEntry());
+        next.back().type = type;
+        next.back().countWantedNow = count;
+        next.back().countBuiltNow = 0;
+    }
+}
+
+void BuildQueue::addEntryTotal(int count, BWAPI::UnitType type){
+
+   bool typeExists = false;
+    
+    //if type already in queue reset count wanted and built
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].type){
+            typeExists = true; 
+            next[i].countWantedTotal = count;
+            next[i].countBuiltTotal=  Tools::CountUnitsOfType(type, BWAPI::Broodwar->self()->getUnits() );           
+        }     
+    }    
+
+    if(!typeExists){
+        next.push_back(QueueEntry());
+        next.back().type = type;
+        next.back().countWantedTotal = count;
+        next.back().countBuiltTotal = Tools::CountUnitsOfType(type, BWAPI::Broodwar->self()->getUnits() ); //init
+    }    
+}
+
+int BuildQueue::updateQty(int index){
+
+    //now takes precedence
+
+    if(next[index].countWantedNow != -1){
+        int nowBuild = next[index].countWantedNow - next[index].countBuiltNow;
+        if (nowBuild > 0){
+            next[index].buildQty = nowBuild;
+            return nowBuild;
+        }  
+    }
+
+    //if relevant this is where we check countBuiltTotal
+    next[index].countBuiltTotal = Tools::CountUnitsOfType(next[index].type, BWAPI::Broodwar->self()->getUnits());
+
+    if(next[index].countWantedTotal != -1){
+        int totalBuild = next[index].countWantedTotal - next[index].countBuiltTotal;
+        if (totalBuild > 0) {
+            next[index].buildQty = totalBuild;
+            return totalBuild;
+        }
+    }
+
+    next[index].buildQty = 0;
+    return 0;
+}
+
+void BuildQueue::rmEntry(BWAPI::UnitType type){
+
+    //not sure why you would need to but this will kill off a bq entry
+    bool typeExists = false;
+    int index = -1;
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].type) typeExists = true;
+        index = i;
+    }
+
+    if(typeExists) next.erase(next.begin() + index);
+
+}
+
 
