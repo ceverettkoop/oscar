@@ -106,13 +106,17 @@ void BuildQueue::updateQueue(){
         if(!rec.isBuilding()){ // if we have a unit pass it
             next[0].type = rec;
             
-        }else{ //otherwise check if we have built as many as prescribed already per ibo
+        }else{ 
+            //check if something is already on the way to build a building/for ibo this is sufficient bc not gonna build two things at once
+            //also check if we have built as many as prescribed already per ibo
             const BWAPI::Unitset& units = BWAPI::Broodwar->self()->getUnits();
             int builtCount = 0;
+            bool sentToBuild = false;
             for (auto& unit : units){ 
                 if(unit->getType() == rec) builtCount++;
+                if(unit->isConstructing()) sentToBuild = true;
             }
-            if (builtCount < bot->ibo.DesiredCountAlreadyBuilt(rec)){
+            if (builtCount < bot->ibo.DesiredCountAlreadyBuilt(rec) && !sentToBuild){
                 next[0].type = rec;
                 return;
             }else{
@@ -132,6 +136,12 @@ void BuildQueue::updateQueue(){
         if( (supplyUsed + 4) >= totalSupply){
             addEntryNow(1, pylon);
         }
+        
+        //assimilator test
+            addEntryNow(1, BWAPI::UnitTypes::Protoss_Assimilator);
+
+        //try to build one dragoon to see how much it fucks up
+            addEntryNow(1, BWAPI::UnitTypes::Protoss_Dragoon);
 
         //DRONE QUEUE
             addEntryTotal(40, worker);
@@ -259,4 +269,34 @@ void BuildQueue::rmEntry(BWAPI::UnitType type){
 
 }
 
+//send queue entry of specified type to front of the list
+void BuildQueue::entryToFront(BWAPI::UnitType type){
+
+    bool typeExists = false;
+    int index = -1;
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].type) typeExists = true;
+        index = i;
+    }
+
+    if(typeExists) std::rotate(next.begin(), (next.begin() + index), next.end());
+
+}
+
+//won't work for lurkers, should for all else; should check if we need prereqs at all before calling this
+BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
+
+    const std::map<BWAPI::UnitType, int> reqs = type.requiredUnits();
+
+    for (int i = 0; i < reqs.size(); ++i){
+        BWAPI::UnitType reqType =  reqs.at(i);
+        if(!Tools::CountUnitsOfType(reqType,BWAPI::Broodwar->self()->getUnits() )){
+            addEntryNow(1, reqType);
+            return reqType;
+        }
+    } 
+
+    //if we didn't find any reqs
+    return BWAPI::UnitTypes::None;
+}
 

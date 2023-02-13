@@ -92,9 +92,10 @@ public:
 	void addEntryNow(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UnitType type);
 	void rmEntry(BWAPI::UnitType type);
-	//TODO add a way to adjust priorities easily
-	//void entryToFront(BWAPI::UnitType type); 
-	//void entryToBack(BWAPI::UnitType type);
+	void entryToFront(BWAPI::UnitType type); 
+	//todo more clever prioritization functions
+	//note bool BWAPI::PlayerInterface::isUnitAvailable (UnitType unit) const will tell if can build
+	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
 
 
 };
