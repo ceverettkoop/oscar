@@ -42,14 +42,28 @@ BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
     {
         // if the unit is of the correct type, and it actually has been constructed, return it
-        if (unit->getType() == type && unit->isCompleted())
-        {
+        if (unit->getType() == type && unit->isCompleted()){
             return unit;
         }
     }
 
     // If we didn't find a valid unit to return, make sure we return nullptr
     return nullptr;
+}
+
+BWAPI::Unit Tools::GetBuilder(BWAPI::UnitType type){
+    
+    // For each unit that we own
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        // if the unit is of the correct type, and it actually has been constructed, AND ITS NOT ON THE WAY TO BUILD
+        if (unit->getType() == type && unit->isCompleted()){
+            if(unit->getLastCommand().getType() != BWAPI::UnitCommandTypes::Build) return unit;
+        }
+    }
+
+    // If we didn't find a valid unit to return, make sure we return nullptr
+    return nullptr;
+    
 }
 
 
@@ -60,21 +74,21 @@ BWAPI::Unit Tools::GetDepot()
 }
 
 // Attempt tp construct a building of a given type 
-bool Tools::BuildBuilding(BWAPI::UnitType type)
-{
+bool Tools::BuildBuilding(BWAPI::UnitType type){
+    bool foundBuilder = false;
+
     // Get the type of unit that is required to build the desired building
     BWAPI::UnitType builderType = type.whatBuilds().first;
-
     // Get a unit that we own that is of the given type so it can build
     // If we can't find a valid builder unit, then we have to cancel the building
-    BWAPI::Unit builder = Tools::GetUnitOfType(builderType);
+    BWAPI::Unit builder = Tools::GetBuilder(builderType);
     if (!builder) { return false; }
 
     // Get a location that we want to build the building next to
     BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
 
     // Ask BWAPI for a building location near the desired position for the type
-    int maxBuildRange = 128;
+    int maxBuildRange = 64;
     bool buildingOnCreep = type.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
     

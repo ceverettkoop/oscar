@@ -129,16 +129,16 @@ void BuildQueue::updateQueue(){
         }
         
         //assimilator test
-            addEntryNow(1, BWAPI::UnitTypes::Protoss_Assimilator);
+            addEntryTotal(1, BWAPI::UnitTypes::Protoss_Assimilator);
 
         //try to build one dragoon to see how much it fucks up
-            addEntryNow(1, BWAPI::UnitTypes::Protoss_Dragoon);
+            addEntryTotal(4, BWAPI::UnitTypes::Protoss_Dragoon);
 
         //DRONE QUEUE
             addEntryTotal(40, worker);
 
         //ZEALOT QUEUE
-            addEntryTotal(40, BWAPI::UnitTypes::Protoss_Zealot);
+            addEntryTotal(10, BWAPI::UnitTypes::Protoss_Zealot);
 
     }
 
@@ -277,13 +277,17 @@ void BuildQueue::entryToFront(BWAPI::UnitType type){
 //won't work for lurkers, should for all else; should check if we need prereqs at all before calling this
 BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
+    if(type == BWAPI::UnitTypes::Protoss_Probe || type == BWAPI::UnitTypes::Protoss_Nexus){
+        return BWAPI::UnitTypes::None;
+    }
+
     const std::map<BWAPI::UnitType, int> reqs = type.requiredUnits();
 
-    for (int i = 0; i < reqs.size(); ++i){
-        BWAPI::UnitType reqType =  reqs.at(i);
-        if(!Tools::CountUnitsOfType(reqType,BWAPI::Broodwar->self()->getUnits() )){
+    for (auto const &p : reqs){
+        BWAPI::UnitType reqType =  p.first;
+        if(!Tools::CountUnitsOfType(reqType, BWAPI::Broodwar->self()->getUnits())){
             addEntryNow(1, reqType);
-            return reqType;
+            return reqType; //only building the first one
         }
     } 
 

@@ -84,7 +84,6 @@ public:
 
 	//constructor w reference to parent bot
 	BuildQueue(StarterBot* const inbot):bot(inbot){
-		next.push_back(QueueEntry()); //put in one entry
 	}
 	StarterBot* getBot(){return bot;}
 	

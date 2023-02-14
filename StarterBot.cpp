@@ -213,32 +213,25 @@ void StarterBot::buildNext(){
     for (int i = 0; i < bq.next.size(); i++){
         
         BWAPI::UnitType nextUnit = bq.next[i].type;
-
-        //first check if prereqs met; if not add them to queue and skip to the end
-        if (!BWAPI::Broodwar->self()->isUnitAvailable(nextUnit)){
-            bq.queueNextPrereq(nextUnit);
-        }else{
+    
+        int countToBuild = bq.updateQty(i); //check how many to build
+        if (countToBuild < 1 ) continue;
         
-            bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
-                nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
-                nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed()));
+        if (!bq.onIbo) bq.queueNextPrereq(nextUnit);
+    
+        bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
+            nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
+            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed()));
 
-            int countToBuild = 0;
-
-            if(canAfford){
-                int countToBuild = bq.updateQty(i); //check how many to build
-
-                if( countToBuild){ //check if counts for this entry make sense or we're on ibo 
-                    if(nextUnit.isBuilding()){
-                        for (int n = 0; n < countToBuild; ++n){
-                            if(Tools::BuildBuilding(nextUnit)) bq.next[i].countBuiltNow++;
-                        }
-                        
-                    }else{
-                        for (int n = 0; n < countToBuild; ++n){
-                            if(Tools::TrainUnit(nextUnit) == QUEUED) bq.next[i].countBuiltNow++;
-                        }
-                    }
+        if(canAfford){
+            if(nextUnit.isBuilding()){
+                for (int n = 0; n < countToBuild; ++n){
+                    if(Tools::BuildBuilding(nextUnit)) bq.next[i].countBuiltNow++;
+                }
+                
+            }else{
+                for (int n = 0; n < countToBuild; ++n){
+                    if(Tools::TrainUnit(nextUnit) == QUEUED) bq.next[i].countBuiltNow++;
                 }
             }
         }
