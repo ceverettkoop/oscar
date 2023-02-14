@@ -23,9 +23,6 @@ enum BuildGoal{
 
 class StarterBot;
 
-//one global bot variable that everything can reference; sorry
-//defined in main.cpp playgame()
-extern StarterBot *bot;
 
 class InitialBuildOrder{
 	//just stores what to build at drone count x
@@ -41,8 +38,11 @@ public:
 	int stepCount = 0;
 	bool isFinished = false;
 	int load_ibo(char* path);
+	StarterBot *const bot;
 	
-	InitialBuildOrder(){};
+	//constructor w reference to parent bot
+	InitialBuildOrder(StarterBot* const inbot):bot(inbot){}
+	StarterBot* getBot(){return bot;}
 
 	//functions
 	void nextStep(int dblSupplyCount, int* targetCount);
@@ -80,9 +80,12 @@ public:
 	static const int maxSize = 5;
 	std::vector<QueueEntry> next; //types of things we are currently trying to build
 	bool onIbo = true;
+	StarterBot* const bot;
 
 	//constructor w reference to parent bot
-	BuildQueue(){};
+	BuildQueue(StarterBot* const inbot):bot(inbot){
+	}
+	StarterBot* getBot(){return bot;}
 	
 	void updateQueue();
 	int updateQty(int index);
@@ -105,8 +108,8 @@ class StarterBot : public BWAPI::AIModule
 
 public:
 
-	InitialBuildOrder ibo = InitialBuildOrder();
-	BuildQueue bq = BuildQueue();
+	InitialBuildOrder ibo = InitialBuildOrder(this);
+	BuildQueue bq = BuildQueue(this);
 
     StarterBot();
 

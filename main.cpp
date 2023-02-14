@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
 
 void PlayGame()
 {
-    StarterBot* bot = new StarterBot();
+    StarterBot *bot = new StarterBot();
     
     // The main game loop, which continues while we are connected to BWAPI and in a game
     while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame())

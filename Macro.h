@@ -1,8 +1,6 @@
 #include "StarterBot.h"
 #include <BWAPI.h>
 
-StarterBot *bot;
-
 class Army{
     
 public:
