@@ -112,18 +112,18 @@ class Tracker{
 
 private:
 	
-	struct builder{
+	struct Builder{
 		BWAPI::Unit unit; //specific builder we are tracking
 		BWAPI::UnitType buildType; //what the builder is trying to build
 	};
 
-	std::map<int,builder>BuilderList;
+	std::map<int,Builder>BuilderList;
 
-	std::map<int,BWAPI::Unit>ScoutList;
-
+	//track other things?
 
 public:
 
+	int lastKey = -1;
 	StarterBot* const bot;
 
 	//constructor w reference to parent bot
@@ -132,9 +132,9 @@ public:
 	StarterBot* getBot(){return bot;}
 
 
-	void updateTracker();
+	void processTracker();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
-	CommandResult didBuilderSucceed(int index);
+	CommandResult didBuilderSucceed(int key);
 	
 
 

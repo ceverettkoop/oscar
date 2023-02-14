@@ -5,21 +5,32 @@
 #include <vector>
 
 //updates tracker AND initiates relevant commands based on result
-void updateTracker(){
+void Tracker::processTracker(){
 
 
     
 }
 
- //returns index to tracked builder
-int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
+ //returns key to tracked builder
+int Tracker::trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
+    
+    int key = lastKey + 1;
 
+    Builder input;
+    input.unit = unit;
+    input.buildType = buildType;
+    BuilderList.insert({key, input});
 
+    lastKey = key;
 
 }
 
-//if success builder is auto removed from queue
-CommandResult didBuilderSucceed(int index){
+//if success builder is auto removed from tracking
+CommandResult Tracker::didBuilderSucceed(int key){
+
+    BWAPI::Unit found = BuilderList.at(key).unit;
+    BWAPI::UnitCommand command = found->getLastCommand();
+
 
 
 }
