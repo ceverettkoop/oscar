@@ -4,6 +4,13 @@
 #include <BWAPI.h>
 #include <vector>
 
+//updates tracker AND initiates relevant commands based on result
+void updateTracker(){
+
+
+    
+}
+
  //returns index to tracked builder
 int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
 
@@ -11,8 +18,8 @@ int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
 
 }
 
-//returns if builder succeeded, if it did delete the entry
-bool didBuilderSucceed(int index){
+//if success builder is auto removed from queue
+CommandResult didBuilderSucceed(int index){
 
 
 }

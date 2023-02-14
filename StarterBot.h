@@ -21,6 +21,12 @@ enum BuildGoal{
 	BUILD_FORGE
 };
 
+enum CommandResult{
+	FAIL,
+	SUCCESS,
+	ONGOING
+};
+
 class StarterBot;
 
 
@@ -105,9 +111,16 @@ public:
 class Tracker{
 
 private:
-	struct builderList{
-		
+	
+	struct builder{
+		BWAPI::Unit unit; //specific builder we are tracking
+		BWAPI::UnitType buildType; //what the builder is trying to build
 	};
+
+	std::map<int,builder>BuilderList;
+
+	std::map<int,BWAPI::Unit>ScoutList;
+
 
 public:
 
@@ -119,8 +132,10 @@ public:
 	StarterBot* getBot(){return bot;}
 
 
+	void updateTracker();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
-	bool didBuilderSucceed(int index);
+	CommandResult didBuilderSucceed(int index);
+	
 
 
 
