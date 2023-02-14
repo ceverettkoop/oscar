@@ -3,6 +3,8 @@
 #include <fstream>
 #include "Tools.h"
 
+//defined in main
+StarterBot* bot;
 
 void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 
@@ -22,7 +24,7 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
         bot->bq.addEntryNow(1, worker);
     }
 
-    //also build prescribed building or unit but only one per step   
+    //also build prescribed building or unit but only one per step 
     for (int i = 0; i < ibo_supplyCount.size(); ++i){
         if (supplyCount >= ibo_supplyCount[i]){
             curStep = i;
