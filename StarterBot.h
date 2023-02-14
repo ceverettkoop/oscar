@@ -102,6 +102,33 @@ public:
 };
 
 
+class Tracker{
+
+private:
+	struct builderList{
+		
+	};
+
+public:
+
+	StarterBot* const bot;
+
+	//constructor w reference to parent bot
+	Tracker(StarterBot* const inbot):bot(inbot){
+	}
+	StarterBot* getBot(){return bot;}
+
+
+	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
+	bool didBuilderSucceed(int index);
+
+
+
+	
+
+
+};
+
 class StarterBot : public BWAPI::AIModule
 {
     MapTools m_mapTools;
@@ -110,6 +137,7 @@ public:
 
 	InitialBuildOrder ibo = InitialBuildOrder(this);
 	BuildQueue bq = BuildQueue(this);
+	Tracker track = Tracker(this);
 
     StarterBot();
 

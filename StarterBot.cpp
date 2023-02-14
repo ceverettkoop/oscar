@@ -115,7 +115,7 @@ void StarterBot::buildAdditionalSupply()
     // Otherwise, we are going to build a supply provider
     const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType, this);
     if (startedBuilding)
     {
         BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
@@ -226,7 +226,7 @@ void StarterBot::buildNext(){
         if(canAfford){
             if(nextUnit.isBuilding()){
                 for (int n = 0; n < countToBuild; ++n){
-                    if(Tools::BuildBuilding(nextUnit)) bq.next[i].countBuiltNow++;
+                    if(Tools::BuildBuilding(nextUnit, this)) bq.next[i].countBuiltNow++;
                 }
                 
             }else{

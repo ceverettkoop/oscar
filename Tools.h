@@ -14,7 +14,7 @@ namespace Tools
     BWAPI::Unit GetBuilder(BWAPI::UnitType type);
     BWAPI::Unit GetDepot();
 
-    bool BuildBuilding(BWAPI::UnitType type);
+    bool BuildBuilding(BWAPI::UnitType type, StarterBot* bot);
     BuildResult TrainUnit(BWAPI::UnitType type);
 
     void DrawUnitBoundingBoxes();

@@ -74,7 +74,7 @@ BWAPI::Unit Tools::GetDepot()
 }
 
 // Attempt tp construct a building of a given type 
-bool Tools::BuildBuilding(BWAPI::UnitType type){
+bool BuildBuilding(BWAPI::UnitType type, StarterBot* bot){
     bool foundBuilder = false;
 
     // Get the type of unit that is required to build the desired building
@@ -96,7 +96,7 @@ bool Tools::BuildBuilding(BWAPI::UnitType type){
 
     //TODO track the builder to make sure it actually initiated the building before moving on
     if (success){
-        /* code */
+        //bot->track
     }
     
 
