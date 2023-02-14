@@ -33,6 +33,8 @@ private:
 	
 public:
 	
+	int curStep = -1;
+	int lastStep = -1;
 	int stepCount = 0;
 	bool isFinished = false;
 	int load_ibo(char* path);
@@ -43,7 +45,7 @@ public:
 	StarterBot* getBot(){return bot;}
 
 	//functions
-	BWAPI::UnitType nextStep(int supplyCount, int* targetCount);
+	void nextStep(int dblSupplyCount, int* targetCount);
 	int DesiredCountAlreadyBuilt(BWAPI::UnitType type);
 
 };

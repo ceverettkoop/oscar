@@ -77,7 +77,16 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
     int maxBuildRange = 128;
     bool buildingOnCreep = type.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
-    return builder->build(type, buildPos);
+    
+    bool success = builder->build(type, buildPos);
+
+    //TODO track the builder to make sure it actually initiated the building before moving on
+    if (success){
+        /* code */
+    }
+    
+
+    return success;
 }
 
 BuildResult Tools::TrainUnit(BWAPI::UnitType type){
@@ -263,4 +272,23 @@ void Tools::DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, in
     {
         BWAPI::Broodwar->drawLineMap(BWAPI::Position(i, hpTop), BWAPI::Position(i, hpBottom), BWAPI::Colors::Black);
     }
+}
+
+int Tools::BuildingHowMany(BWAPI::UnitType type){
+
+    int qty = 0;
+
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        // get the last command given to the unit
+        const BWAPI::UnitCommand& command = unit->getLastCommand();
+
+        // if it's not a build command we can ignore it
+        if (command.getType() != BWAPI::UnitCommandTypes::Build) { continue; }
+
+        // otherwise check for match
+        if(type == command.getUnitType()) qty++;
+    }
+
+    return qty;
+
 }

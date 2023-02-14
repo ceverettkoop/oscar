@@ -226,9 +226,9 @@ void StarterBot::buildNext(){
             int countToBuild = 0;
 
             if(canAfford){
-                bq.onIbo ? countToBuild = 1 : countToBuild = bq.updateQty(i); //if on ibo queue one, otherwise check how many
+                int countToBuild = bq.updateQty(i); //check how many to build
 
-                if( countToBuild || bq.onIbo){ //check if counts for this entry make sense or we're on ibo 
+                if( countToBuild){ //check if counts for this entry make sense or we're on ibo 
                     if(nextUnit.isBuilding()){
                         for (int n = 0; n < countToBuild; ++n){
                             if(Tools::BuildBuilding(nextUnit)) bq.next[i].countBuiltNow++;
@@ -241,12 +241,6 @@ void StarterBot::buildNext(){
                     }
                 }
             }
-
-            if (bq.onIbo){
-                bq.next[i].buildQty = 1;
-                return;
-            }  //we're done after first element if on ibo
-
         }
     }
     

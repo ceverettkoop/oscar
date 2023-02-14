@@ -4,25 +4,37 @@
 #include "Tools.h"
 
 
-BWAPI::UnitType InitialBuildOrder::nextStep(int supplyCount, int* targetCount){
+void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 
-    for (size_t i = 0; i < ibo_supplyCount.size(); i++){
-            if (supplyCount <= ibo_supplyCount[i]){
-            if(supplyCount == ibo_supplyCount[i]){
-                if (supplyCount >= ibo_supplyCount.back()) isFinished = true;
-                *targetCount = ibo_supplyCount[i];
-                return ibo_unitType[i];
-            }else{
-                //double supply count will be broken TODO
-                *targetCount = ibo_supplyCount[i];
-                BWAPI::UnitType test = BWAPI::Broodwar->self()->getRace().getWorker();
-                return test;
-            } 
-        }
+    int supplyCount = dblSupplyCount; //ibo was doubled already whoops
+        
+    //assume constant droning unless flagged no or switched below
+    bool droning = true;
+    BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
+    BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+
+    //cut drones if next one will eff pylon
+    if(ibo_unitType[curStep+1] == pylon && ( (supplyCount + 2) >= ibo_supplyCount[curStep+1] ) ){
+        if( BWAPI::Broodwar->self()->minerals() < 150)  droning = false;
     }
 
-    fprintf(stderr, "Something failed in IBO reader\n");
-    return BWAPI::Broodwar->self()->getRace().getWorker();    
+    if(droning){ 
+        bot->bq.addEntryNow(1, worker);
+    }
+
+    //also build prescribed building or unit but only one per step   
+    for (int i = 0; i < ibo_supplyCount.size(); ++i){
+        if (supplyCount >= ibo_supplyCount[i]){
+            curStep = i;
+            if (lastStep < curStep){ //if new step 
+                bot->bq.addEntryNow(1, ibo_unitType[i]); //queue one up
+                if (supplyCount >= ibo_supplyCount.back()) isFinished = true;
+                *targetCount = ibo_supplyCount[i];
+                lastStep = curStep; //reset step check
+                return;
+            }
+        }
+    } 
 }
 
 //take a file of integers seperated by space or newline of the format:
@@ -101,30 +113,9 @@ void BuildQueue::updateQueue(){
     
     //logic for initial build order 
     if(onIbo){
-        BWAPI::UnitType rec = bot->ibo.nextStep(BWAPI::Broodwar->self()->supplyUsed(), &targetCount);
-        
-        if(!rec.isBuilding()){ // if we have a unit pass it
-            next[0].type = rec;
-            
-        }else{ 
-            //check if something is already on the way to build a building/for ibo this is sufficient bc not gonna build two things at once
-            //also check if we have built as many as prescribed already per ibo
-            const BWAPI::Unitset& units = BWAPI::Broodwar->self()->getUnits();
-            int builtCount = 0;
-            bool sentToBuild = false;
-            for (auto& unit : units){ 
-                if(unit->getType() == rec) builtCount++;
-                if(unit->isConstructing()) sentToBuild = true;
-            }
-            if (builtCount < bot->ibo.DesiredCountAlreadyBuilt(rec) && !sentToBuild){
-                next[0].type = rec;
-                return;
-            }else{
-                next[0].type = worker;
-                return;
-            }
-        }
-    }else{ //past ibo behavior now using more queue slots
+        bot->ibo.nextStep(BWAPI::Broodwar->self()->supplyUsed(), &targetCount);
+
+    }else{ //past ibo behavior
 
         BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
         int supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
