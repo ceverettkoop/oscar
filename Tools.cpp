@@ -51,6 +51,19 @@ BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
     return nullptr;
 }
 
+BWAPI::Unitset Tools::GetUnitSetofType(BWAPI::UnitType type){
+
+    BWAPI::Unitset returnSet;
+
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        if (unit->getType() == type && unit->isCompleted()){
+            returnSet.insert(unit);
+        }
+    }
+
+    return returnSet;
+}
+
 BWAPI::Unit Tools::GetBuilder(BWAPI::UnitType type){
     
     // For each unit that we own
@@ -74,7 +87,7 @@ BWAPI::Unit Tools::GetDepot()
 }
 
 // Attempt tp construct a building of a given type 
-bool BuildBuilding(BWAPI::UnitType type, StarterBot* bot){
+bool Tools::BuildBuilding(BWAPI::UnitType type, StarterBot* bot){
     bool foundBuilder = false;
 
     // Get the type of unit that is required to build the desired building

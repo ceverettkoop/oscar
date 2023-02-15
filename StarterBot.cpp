@@ -50,6 +50,10 @@ void StarterBot::onFrame()
     // Send our idle workers to mine minerals so they don't just stand there
     sendIdleWorkersToMinerals();
 
+    //divert workers to gas if we have less than X
+    //and if we have an assimilator
+    collectGas(3);
+
     //built next unit/building or wait for money to accrue
     buildNext();
 
@@ -69,6 +73,7 @@ void StarterBot::onFrame()
 // Send our idle workers to mine minerals so they don't just stand there
 void StarterBot::sendIdleWorkersToMinerals()
 {
+
     // Let's send all of our starting workers to the closest mineral to them
     // First we need to loop over all of the units that we (BWAPI::Broodwar->self()) own
     const BWAPI::Unitset& myUnits = BWAPI::Broodwar->self()->getUnits();
@@ -84,6 +89,32 @@ void StarterBot::sendIdleWorkersToMinerals()
             if (closestMineral) { unit->rightClick(closestMineral); }
         }
     }
+}
+
+void StarterBot::collectGas(int countPerGeyser){
+
+    BWAPI::Unitset refineries = Tools::GetUnitSetofType(BWAPI::Broodwar->self()->getRace().getRefinery());
+    if(refineries.size() == 0) return;
+
+    //how many workers are collecting gas
+    //this will need to get more complex for multibase
+    //sending one per frame TODO stagger them
+    const BWAPI::Unitset& myUnits = BWAPI::Broodwar->self()->getUnits();
+    int foundGatherers = 0;
+    for (auto& unit : myUnits){
+        if (unit->getType().isWorker() && unit->isGatheringGas()) foundGatherers++;
+    }
+
+    if(foundGatherers < countPerGeyser){
+        for (auto& unit : myUnits){
+            if (unit->getType().isWorker() && unit->isGatheringMinerals()){
+                BWAPI::Unit closestGas = Tools::GetClosestUnitTo(unit, refineries);
+                unit->gather(closestGas);
+                break;
+            }
+        }
+    }
+
 }
 
 // Train more workers so we can gather more income

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "StarterBot.h"
 #include "Tools.h"
 #include <BWAPI.h>
@@ -27,6 +25,8 @@ int Tracker::trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
     input.initBuildCount = Tools::CountUnitsOfType(buildType,BWAPI::Broodwar->self()->getUnits());
     BuilderList.insert({key, input});
     lastKey = key;
+
+    return key;
 
 }
 

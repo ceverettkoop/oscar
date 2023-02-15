@@ -13,10 +13,10 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
     BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
-    //cut drones if next one will eff pylon
+    /*//cut drones if next one will eff pylon
     if(ibo_unitType[curStep+1] == pylon && ( (supplyCount + 2) >= ibo_supplyCount[curStep+1] ) ){
         if( BWAPI::Broodwar->self()->minerals() < 150)  droning = false;
-    }
+    }*/
 
     if(droning){ 
         bot->bq.addEntryNow(1, worker);

@@ -136,7 +136,7 @@ public:
 	void processTracker();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
 	void untrackBuilder(int key);
-	CommandResult Tracker::didBuilderSucceed(int key, Builder found);
+	CommandResult didBuilderSucceed(int key, Builder found);
 	
 
 
@@ -166,6 +166,7 @@ public:
     void trainAdditionalWorkers();
     void buildAdditionalSupply();
     void drawDebugInformation();
+	void collectGas(int countPerGeyser);
 
     // functions that are triggered by various BWAPI events from main.cpp
 	void onStart();
