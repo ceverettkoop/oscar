@@ -110,7 +110,7 @@ bool Tools::BuildBuilding(BWAPI::UnitType type, StarterBot* bot){
     //TODO track the builder to make sure it actually initiated the building before moving on
     //once tracked a seperate function will update status and if unit fails will re-add building to queue
     if (success){
-        //bot->trackBuilder
+        bot->track.trackBuilder(builder, type);
     }
     
 

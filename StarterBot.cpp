@@ -247,8 +247,6 @@ void StarterBot::buildNext(){
     
         int countToBuild = bq.updateQty(i); //check how many to build
         if (countToBuild < 1 ) continue;
-        
-        if (!bq.onIbo) bq.queueNextPrereq(nextUnit);
     
         bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
             nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
@@ -266,6 +264,9 @@ void StarterBot::buildNext(){
                 }
             }
         }
+
+        //somehow i think putting this after the build commands helps idk
+        if (!bq.onIbo) bq.queueNextPrereq(nextUnit);
     }
     
     return;

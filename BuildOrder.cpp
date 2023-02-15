@@ -234,14 +234,22 @@ int BuildQueue::updateQty(int index){
     //if relevant this is where we check countBuiltTotal
     next[index].countBuiltTotal = Tools::CountUnitsOfType(next[index].type, BWAPI::Broodwar->self()->getUnits());
 
+
     if(next[index].countWantedTotal != -1){
         int totalBuild = next[index].countWantedTotal - next[index].countBuiltTotal;
+        //now subtract any building about to be built by a worker
+        for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+            if (unit->getBuildType() == next[index].type){
+                totalBuild--;
+            }
+    }
         if (totalBuild > 0) {
             next[index].buildQty = totalBuild;
             return totalBuild;
         }
     }
 
+    //if difference is 0 or less
     next[index].buildQty = 0;
     return 0;
 }
@@ -277,14 +285,25 @@ void BuildQueue::entryToFront(BWAPI::UnitType type){
 //won't work for lurkers, should for all else; should check if we need prereqs at all before calling this
 BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
-    if(type == BWAPI::UnitTypes::Protoss_Probe || type == BWAPI::UnitTypes::Protoss_Nexus){
+    if(type == BWAPI::UnitTypes::Protoss_Probe || type == BWAPI::UnitTypes::Protoss_Nexus || 
+        type == BWAPI::UnitTypes::Protoss_Pylon){
         return BWAPI::UnitTypes::None;
     }
 
     const std::map<BWAPI::UnitType, int> reqs = type.requiredUnits();
 
     for (auto const &p : reqs){
+
         BWAPI::UnitType reqType =  p.first;
+        bool aboutToBuild = false;
+
+        //check if on the way to build and if so move on
+        for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+            if (unit->getBuildType() == reqType) aboutToBuild = true;
+        }
+        if (aboutToBuild) continue;
+
+        //add one to queue if not built yet and not on the way to build
         if(!Tools::CountUnitsOfType(reqType, BWAPI::Broodwar->self()->getUnits())){
             addEntryNow(1, reqType);
             return reqType; //only building the first one
