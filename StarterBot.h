@@ -135,7 +135,6 @@ public:
 
 	void processTracker();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
-	void untrackBuilder(int key);
 	CommandResult didBuilderSucceed(int key, Builder found);
 	
 

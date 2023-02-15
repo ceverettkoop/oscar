@@ -6,11 +6,19 @@
 
 //updates tracker AND initiates relevant commands based on result
 void Tracker::processTracker(){
+    std::vector<int> completedBuilders;
 
     for(auto& entry: BuilderList){
         CommandResult result = didBuilderSucceed(entry.first, entry.second);
         if (result == FAIL_AND_RETRY) bot->bq.addEntryNow(1, entry.second.buildType);
+        if (result != ONGOING) completedBuilders.push_back(entry.first);
     }
+
+    //delete former builders
+    for(auto& key: completedBuilders){
+        BuilderList.erase(key);
+    }
+    
     
 }
 
@@ -40,20 +48,12 @@ CommandResult Tracker::didBuilderSucceed(int key, Builder found){
     //assume buildtype matches unit is on the way
     if(found.unit->getBuildType() != found.buildType){
         int newCount = Tools::CountUnitsOfType(found.buildType,BWAPI::Broodwar->self()->getUnits());
-        if (newCount <= found.initBuildCount){
-            untrackBuilder(key);
+        if (newCount <= found.initBuildCount){ 
             return FAIL_AND_RETRY;
         }else{
             return SUCCESS;}
     }else{
-        untrackBuilder(key);
         return ONGOING;
     }
-
-}
-
-void Tracker::untrackBuilder(int key){
-
-    BuilderList.erase(key);
 
 }

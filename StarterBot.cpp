@@ -57,6 +57,9 @@ void StarterBot::onFrame()
     //built next unit/building or wait for money to accrue
     buildNext();
 
+    //check on builders etc
+    track.processTracker();
+
     // Train more workers so we can gather more income
     //trainAdditionalWorkers();
 
