@@ -22,7 +22,7 @@ enum BuildGoal{
 };
 
 enum CommandResult{
-	FAIL,
+	FAIL_AND_RETRY,
 	SUCCESS,
 	ONGOING
 };
@@ -115,6 +115,7 @@ private:
 	struct Builder{
 		BWAPI::Unit unit; //specific builder we are tracking
 		BWAPI::UnitType buildType; //what the builder is trying to build
+		int initBuildCount = 0;
 	};
 
 	std::map<int,Builder>BuilderList;
@@ -134,7 +135,8 @@ public:
 
 	void processTracker();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
-	CommandResult didBuilderSucceed(int key);
+	void untrackBuilder(int key);
+	CommandResult Tracker::didBuilderSucceed(int key, Builder found);
 	
 
 

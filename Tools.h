@@ -1,5 +1,3 @@
-#pragma once
-
 #include <BWAPI.h>
 #include "StarterBot.h"
 
