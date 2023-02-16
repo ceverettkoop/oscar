@@ -28,7 +28,7 @@ void Tracker::processTracker(){
                 bot->gs.scouting = true;
             }
         }
-    }
+    }else(bot->gs.scouting = false); //this is if we found the enemy
 
     //assign scout if needed
     if(bot->gs.scouting){

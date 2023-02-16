@@ -189,16 +189,13 @@ void StarterBot::scout(){
         BWAPI::Position pos(tpos);
         track.scout->move(pos);
 
-        /* FIX THIS THING WHERE I TELL IF AN ENEMY IS THER
         if(BWAPI::Broodwar->isExplored(tpos)){
             BWAPI::Unitset baseUnits = BWAPI::Broodwar->getUnitsOnTile(tpos);
             for(auto& unit : baseUnits){
-                if(unit->getPlayer()->isEnemy());
-                 gs.enemyLocation = tpos;
+                if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) gs.enemyLocation = tpos;
             }    
         }
-        */
-
+        
         break;
     }
 
