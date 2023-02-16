@@ -107,6 +107,20 @@ public:
 
 };
 
+class GameState{
+
+public:
+	bool scouting = false;
+	BWAPI::TilePosition enemyLocation = BWAPI::TilePositions::Unknown;
+	StarterBot* const bot;
+
+	//constructor w reference to parent bot
+	GameState(StarterBot* const inbot):bot(inbot){
+	}
+	StarterBot* getBot(){return bot;}
+
+};
+
 
 class Tracker{
 
@@ -126,6 +140,7 @@ public:
 
 	int lastKey = -1;
 	StarterBot* const bot;
+	BWAPI::Unit scout = nullptr;
 
 	//constructor w reference to parent bot
 	Tracker(StarterBot* const inbot):bot(inbot){
@@ -136,12 +151,6 @@ public:
 	void processTracker();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
 	CommandResult didBuilderSucceed(int key, Builder found);
-	
-
-
-
-	
-
 
 };
 
@@ -154,18 +163,20 @@ public:
 	InitialBuildOrder ibo = InitialBuildOrder(this);
 	BuildQueue bq = BuildQueue(this);
 	Tracker track = Tracker(this);
+	GameState gs = GameState(this);
 
     StarterBot();
 
     //my functions to have bot do stuff (bot thinking elsewhere)
 	void buildNext();
 	
-	// helper functions to get you started with bot programming and learn the API
+	//general bot actions
     void sendIdleWorkersToMinerals();
     void trainAdditionalWorkers();
     void buildAdditionalSupply();
     void drawDebugInformation();
 	void collectGas(int countPerGeyser);
+	void scout();
 
     // functions that are triggered by various BWAPI events from main.cpp
 	void onStart();

@@ -60,6 +60,10 @@ void StarterBot::onFrame()
     //check on builders etc
     track.processTracker();
 
+    //scout - this will get moved
+    if(gs.scouting) scout();
+
+
     // Train more workers so we can gather more income
     //trainAdditionalWorkers();
 
@@ -173,6 +177,30 @@ void StarterBot::drawDebugInformation(){
 
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
+
+}
+
+void StarterBot::scout(){
+    auto& startLocations = BWAPI::Broodwar->getStartLocations();
+
+    for(BWAPI::TilePosition tpos : startLocations){
+        if(BWAPI::Broodwar->isExplored(tpos)) continue;
+
+        BWAPI::Position pos(tpos);
+        track.scout->move(pos);
+
+        /* FIX THIS THING WHERE I TELL IF AN ENEMY IS THER
+        if(BWAPI::Broodwar->isExplored(tpos)){
+            BWAPI::Unitset baseUnits = BWAPI::Broodwar->getUnitsOnTile(tpos);
+            for(auto& unit : baseUnits){
+                if(unit->getPlayer()->isEnemy());
+                 gs.enemyLocation = tpos;
+            }    
+        }
+        */
+
+        break;
+    }
 
 }
 

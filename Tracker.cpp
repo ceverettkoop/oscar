@@ -6,6 +6,8 @@
 
 //updates tracker AND initiates relevant commands based on result
 void Tracker::processTracker(){
+    
+    //builders
     std::vector<int> completedBuilders;
 
     for(auto& entry: BuilderList){
@@ -18,6 +20,22 @@ void Tracker::processTracker(){
     for(auto& key: completedBuilders){
         BuilderList.erase(key);
     }
+
+    //TODO MOVE THIS ELSEWHERE; for now decision if we are scouting is here
+    if(bot->gs.enemyLocation == BWAPI::TilePositions::Unknown){
+        if(!bot->gs.scouting){
+            if(BWAPI::Broodwar->self()->supplyUsed() > 16){
+                bot->gs.scouting = true;
+            }
+        }
+    }
+
+    //assign scout if needed
+    if(bot->gs.scouting){
+        if(scout == nullptr || !scout->exists()){ //if scout not assigned or dead
+            scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
+        }
+    }else scout = nullptr; //if not scouting release any unit from being called a scout
     
     
 }
