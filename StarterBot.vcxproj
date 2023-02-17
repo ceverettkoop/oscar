@@ -33,6 +33,7 @@
     <ClCompile Include="ReplayParser.cpp" />
     <ClCompile Include="StarterBot.cpp" />
     <ClCompile Include="Tools.cpp" />
+    <ClCompile Include="Tracker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>StarterBot</ProjectName>
