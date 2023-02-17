@@ -3,6 +3,7 @@
 #include "MapTools.h"
 #include <BWAPI.h>
 #include <vector>
+#include <BWEM/bwem.h>
 
 enum BuildResult{
     NODATA,
