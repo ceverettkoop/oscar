@@ -172,8 +172,6 @@ public:
 	
 	//general bot actions
     void sendIdleWorkersToMinerals();
-    void trainAdditionalWorkers();
-    void buildAdditionalSupply();
     void drawDebugInformation();
 	void collectGas(int countPerGeyser);
 	void scout();

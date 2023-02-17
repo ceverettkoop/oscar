@@ -124,41 +124,6 @@ void StarterBot::collectGas(int countPerGeyser){
 
 }
 
-// Train more workers so we can gather more income
-void StarterBot::trainAdditionalWorkers()
-{
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const int workersWanted = 20;
-    const int workersOwned = Tools::CountUnitsOfType(workerType, BWAPI::Broodwar->self()->getUnits());
-    if (workersOwned < workersWanted)
-    {
-        // get the unit pointer to my depot
-        const BWAPI::Unit myDepot = Tools::GetDepot();
-
-        // if we have a valid depot unit and it's currently not training something, train a worker
-        // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-        if (myDepot && !myDepot->isTraining()) { myDepot->train(workerType); }
-    }
-}
-
-// Build more supply if we are going to run out soon
-void StarterBot::buildAdditionalSupply()
-{
-    // Get the amount of supply supply we currently have unused
-    const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
-
-    // If we have a sufficient amount of supply, we don't need to do anything
-    if (unusedSupply >= 2) { return; }
-
-    // Otherwise, we are going to build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType, this);
-    if (startedBuilding)
-    {
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-    }
-}
 
 // Draw some relevent information to the screen to help us debug the bot
 void StarterBot::drawDebugInformation(){
