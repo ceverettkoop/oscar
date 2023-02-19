@@ -5,18 +5,19 @@
 #endif
 
 #include <cstring>
-#include "StarterBot.h"
+#include "Oscar.h"
 #include "Tools.h"
 #include "MapTools.h"
+#include "BWEM/bwem.h"
 
 
-StarterBot::StarterBot()
+Oscar::Oscar()
 {
     
 }
 
 // Called when the bot starts!
-void StarterBot::onStart()
+void Oscar::onStart()
 {
     // Set our BWAPI options here    
 	BWAPI::Broodwar->setLocalSpeed(10);
@@ -27,6 +28,10 @@ void StarterBot::onStart()
 
     // Call MapTools OnStart
     m_mapTools.onStart();
+
+    //Initalize BWEM, will replace above if possible
+    BWEM::Map::Instance().Initialize(BWAPI::BroodwarPtr);
+    BWEM::Map::Instance().EnableAutomaticPathAnalysis();
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
@@ -42,7 +47,7 @@ void StarterBot::onStart()
 }
 
 // Called on each frame of the game
-void StarterBot::onFrame()
+void Oscar::onFrame()
 {
     // Update our MapTools information
     m_mapTools.onFrame();
@@ -58,11 +63,10 @@ void StarterBot::onFrame()
     buildNext();
 
     //check on builders etc
-    track.processTracker();
+    track.onFrame();
 
     //scout - this will get moved
     if(gs.scouting) scout();
-
 
     // Train more workers so we can gather more income
     //trainAdditionalWorkers();
@@ -78,7 +82,7 @@ void StarterBot::onFrame()
 }
 
 // Send our idle workers to mine minerals so they don't just stand there
-void StarterBot::sendIdleWorkersToMinerals()
+void Oscar::sendIdleWorkersToMinerals()
 {
 
     // Let's send all of our starting workers to the closest mineral to them
@@ -98,7 +102,7 @@ void StarterBot::sendIdleWorkersToMinerals()
     }
 }
 
-void StarterBot::collectGas(int countPerGeyser){
+void Oscar::collectGas(int countPerGeyser){
 
     BWAPI::Unitset refineries = Tools::GetUnitSetofType(BWAPI::Broodwar->self()->getRace().getRefinery());
     if(refineries.size() == 0) return;
@@ -126,7 +130,7 @@ void StarterBot::collectGas(int countPerGeyser){
 
 
 // Draw some relevent information to the screen to help us debug the bot
-void StarterBot::drawDebugInformation(){
+void Oscar::drawDebugInformation(){
 
     char format[1024] = "Current build priority:\n";
     char qty[16] = "";
@@ -145,7 +149,7 @@ void StarterBot::drawDebugInformation(){
 
 }
 
-void StarterBot::scout(){
+void Oscar::scout(){
     auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
     for(BWAPI::TilePosition tpos : startLocations){
@@ -167,26 +171,26 @@ void StarterBot::scout(){
 }
 
 // Called whenever the game ends and tells you if you won or not
-void StarterBot::onEnd(bool isWinner)
+void Oscar::onEnd(bool isWinner)
 {
     std::cout << "We " << (isWinner ? "won!" : "lost!") << "\n";
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
-void StarterBot::onUnitDestroy(BWAPI::Unit unit)
+void Oscar::onUnitDestroy(BWAPI::Unit unit)
 {
 	
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
 // Zerg units morph when they turn into other units
-void StarterBot::onUnitMorph(BWAPI::Unit unit)
+void Oscar::onUnitMorph(BWAPI::Unit unit)
 {
 	
 }
 
 // Called whenever a text is sent to the game by a user
-void StarterBot::onSendText(std::string text) 
+void Oscar::onSendText(std::string text) 
 { 
     if (text == "/map")
     {
@@ -197,40 +201,40 @@ void StarterBot::onSendText(std::string text)
 // Called whenever a unit is created, with a pointer to the destroyed unit
 // Units are created in buildings like barracks before they are visible, 
 // so this will trigger when you issue the build command for most units
-void StarterBot::onUnitCreate(BWAPI::Unit unit)
+void Oscar::onUnitCreate(BWAPI::Unit unit)
 { 
 	
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
-void StarterBot::onUnitComplete(BWAPI::Unit unit)
+void Oscar::onUnitComplete(BWAPI::Unit unit)
 {
 	
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
 // This is usually triggered when units appear from fog of war and become visible
-void StarterBot::onUnitShow(BWAPI::Unit unit)
+void Oscar::onUnitShow(BWAPI::Unit unit)
 { 
 	
 }
 
 // Called whenever a unit gets hidden, with a pointer to the destroyed unit
 // This is usually triggered when units enter the fog of war and are no longer visible
-void StarterBot::onUnitHide(BWAPI::Unit unit)
+void Oscar::onUnitHide(BWAPI::Unit unit)
 { 
 	
 }
 
 // Called whenever a unit switches player control
 // This usually happens when a dark archon takes control of a unit
-void StarterBot::onUnitRenegade(BWAPI::Unit unit)
+void Oscar::onUnitRenegade(BWAPI::Unit unit)
 { 
 	
 }
 
 //Iterate through entries in building queue and build what we are supposed to build
-void StarterBot::buildNext(){
+void Oscar::buildNext(){
 
     bq.updateQueue();
 

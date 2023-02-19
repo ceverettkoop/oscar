@@ -1,4 +1,4 @@
-#include "StarterBot.h"
+#include "Oscar.h"
 #include <BWAPI.h>
 #include <fstream>
 #include "Tools.h"

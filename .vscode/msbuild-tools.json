@@ -1,5 +1,5 @@
 {
-    "solution": "${workspaceRoot}/StarterBot.sln",
+    "solution": "${workspaceRoot}/Oscar.sln",
     "variables": {
         "MSBUILD": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe",
         "DEVENV": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.com"

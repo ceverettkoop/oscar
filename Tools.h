@@ -1,5 +1,5 @@
 #include <BWAPI.h>
-#include "StarterBot.h"
+#include "Oscar.h"
 
 namespace Tools
 {
@@ -13,7 +13,7 @@ namespace Tools
     BWAPI::Unit GetBuilder(BWAPI::UnitType type);
     BWAPI::Unit GetDepot();
 
-    bool BuildBuilding(BWAPI::UnitType type, StarterBot* bot);
+    bool BuildBuilding(BWAPI::UnitType type, Oscar* bot);
     BuildResult TrainUnit(BWAPI::UnitType type);
 
     void DrawUnitBoundingBoxes();

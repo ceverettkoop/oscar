@@ -22,7 +22,7 @@
     <ClInclude Include="Grid.hpp" />
     <ClInclude Include="MapTools.h" />
     <ClInclude Include="ReplayParser.h" />
-    <ClInclude Include="StarterBot.h" />
+    <ClInclude Include="Oscar.h" />
     <ClInclude Include="Tools.h" />
   </ItemGroup>
   <ItemGroup>
@@ -31,12 +31,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapTools.cpp" />
     <ClCompile Include="ReplayParser.cpp" />
-    <ClCompile Include="StarterBot.cpp" />
+    <ClCompile Include="Oscar.cpp" />
     <ClCompile Include="Tools.cpp" />
     <ClCompile Include="Tracker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>StarterBot</ProjectName>
+    <ProjectName>Oscar</ProjectName>
     <ProjectGuid>{B2D2AD6C-D98B-42D0-8E4B-3C79D9DB27B7}</ProjectGuid>
     <RootNamespace>ExampleAIModule</RootNamespace>
     <Keyword>Win32Proj</Keyword>

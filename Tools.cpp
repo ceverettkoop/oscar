@@ -1,5 +1,5 @@
 #include "Tools.h"
-#include "StarterBot.h"
+#include "Oscar.h"
 
 BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units)
 {
@@ -87,7 +87,7 @@ BWAPI::Unit Tools::GetDepot()
 }
 
 // Attempt tp construct a building of a given type 
-bool Tools::BuildBuilding(BWAPI::UnitType type, StarterBot* bot){
+bool Tools::BuildBuilding(BWAPI::UnitType type, Oscar* bot){
     bool foundBuilder = false;
 
     // Get the type of unit that is required to build the desired building

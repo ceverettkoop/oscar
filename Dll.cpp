@@ -6,7 +6,7 @@
 #define DLLEXPORT
 #endif
 
-#include "StarterBot.h"
+#include "Oscar.h"
 
 extern "C" DLLEXPORT void gameInit(BWAPI::Game* game) { BWAPI::BroodwarPtr = game; }
 #ifdef _WIN32
@@ -23,7 +23,7 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 #endif
 
-extern "C" DLLEXPORT StarterBot* newAIModule()
+extern "C" DLLEXPORT Oscar* newAIModule()
 {
-  return new StarterBot();
+  return new Oscar();
 }

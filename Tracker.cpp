@@ -1,11 +1,11 @@
-#include "StarterBot.h"
+#include "Oscar.h"
 #include "Tools.h"
 #include <BWAPI.h>
 #include <vector>
 
 
 //updates tracker AND initiates relevant commands based on result
-void Tracker::processTracker(){
+void Tracker::onFrame(){
     
     //builders
     std::vector<int> completedBuilders;

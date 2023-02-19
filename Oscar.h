@@ -1,3 +1,7 @@
+//Oscar BW bot
+//meant to compile on Linux/OpenBW or with Visual Studio on Win32
+//based on Starterbot from Dave Churchill
+
 #pragma once
 
 #include "MapTools.h"
@@ -28,7 +32,7 @@ enum CommandResult{
 	ONGOING
 };
 
-class StarterBot;
+class Oscar;
 
 
 class InitialBuildOrder{
@@ -45,11 +49,11 @@ public:
 	int stepCount = 0;
 	bool isFinished = false;
 	int load_ibo(char* path);
-	StarterBot *const bot;
+	Oscar *const bot;
 	
 	//constructor w reference to parent bot
-	InitialBuildOrder(StarterBot* const inbot):bot(inbot){}
-	StarterBot* getBot(){return bot;}
+	InitialBuildOrder(Oscar* const inbot):bot(inbot){}
+	Oscar* getBot(){return bot;}
 
 	//functions
 	void nextStep(int dblSupplyCount, int* targetCount);
@@ -87,12 +91,12 @@ public:
 	static const int maxSize = 5;
 	std::vector<QueueEntry> next; //types of things we are currently trying to build
 	bool onIbo = true;
-	StarterBot* const bot;
+	Oscar* const bot;
 
 	//constructor w reference to parent bot
-	BuildQueue(StarterBot* const inbot):bot(inbot){
+	BuildQueue(Oscar* const inbot):bot(inbot){
 	}
-	StarterBot* getBot(){return bot;}
+	Oscar* getBot(){return bot;}
 	
 	void updateQueue();
 	int updateQty(int index);
@@ -113,12 +117,12 @@ class GameState{
 public:
 	bool scouting = false;
 	BWAPI::TilePosition enemyLocation = BWAPI::TilePositions::Unknown;
-	StarterBot* const bot;
+	Oscar* const bot;
 
 	//constructor w reference to parent bot
-	GameState(StarterBot* const inbot):bot(inbot){
+	GameState(Oscar* const inbot):bot(inbot){
 	}
-	StarterBot* getBot(){return bot;}
+	Oscar* getBot(){return bot;}
 
 };
 
@@ -140,22 +144,22 @@ private:
 public:
 
 	int lastKey = -1;
-	StarterBot* const bot;
+	Oscar* const bot;
 	BWAPI::Unit scout = nullptr;
 
 	//constructor w reference to parent bot
-	Tracker(StarterBot* const inbot):bot(inbot){
+	Tracker(Oscar* const inbot):bot(inbot){
 	}
-	StarterBot* getBot(){return bot;}
+	Oscar* getBot(){return bot;}
 
 
-	void processTracker();
+	void onFrame();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
 	CommandResult didBuilderSucceed(int key, Builder found);
 
 };
 
-class StarterBot : public BWAPI::AIModule
+class Oscar : public BWAPI::AIModule
 {
     MapTools m_mapTools;
 
@@ -166,7 +170,7 @@ public:
 	Tracker track = Tracker(this);
 	GameState gs = GameState(this);
 
-    StarterBot();
+    Oscar();
 
     //my functions to have bot do stuff (bot thinking elsewhere)
 	void buildNext();

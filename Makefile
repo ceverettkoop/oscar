@@ -5,12 +5,12 @@ CPPFLAGS=-I$(IDIR) -ggdb -fPIC
 ODIR=obj
 IDIR =../include -I../
 LDFLAGS=-L../lib/
-LDLIBS=-l:libBWAPILIB.so -l:libBWAPIClient.a
+LDLIBS=-l:libBWAPILIB.so -l:libBWAPIClient.a -l:libBWEBlib.a
 DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 _DEPS=
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ=main.o BuildOrder.o Dll.o MapTools.o ReplayParser.o StarterBot.o Tools.o Tracker.o
+_OBJ=main.o BuildOrder.o Dll.o MapTools.o ReplayParser.o Oscar.o Tools.o Tracker.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
