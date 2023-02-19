@@ -33,9 +33,9 @@ void BuildQueue::onFrame(){
             if(nextUnit.isBuilding()){
                 bool built = false;
                 for (int n = 0; n < countToBuild; ++n){
-                    BWAPI::Unit builder;
-                    if(built = BuildBuilding(nextUnit, builder)) next[i].countBuiltNow++;
-                        if (built){track.trackBuilder(builder, nextUnit);
+                    BWAPI::Unit foundBuilder;
+                    if(built = BuildBuilding(nextUnit, &foundBuilder)) next[i].countBuiltNow++;
+                        if (built){track.trackBuilder(foundBuilder, nextUnit);
                         }
                 }
                 
@@ -243,14 +243,13 @@ BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
 
 // Attempt tp construct a building of a given type 
-bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit builder){
-    bool foundBuilder = false;
+bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder){
 
     // Get the type of unit that is required to build the desired building
     BWAPI::UnitType builderType = type.whatBuilds().first;
     // Get a unit that we own that is of the given type so it can build
     // If we can't find a valid builder unit, then we have to cancel the building
-    builder = Tools::GetBuilder(builderType);
+    BWAPI::Unit builder = Tools::GetBuilder(builderType);
     if (!builder) { return false; }
 
     // Get a location that we want to build the building next to
@@ -262,6 +261,8 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit builder){
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
     
     bool success = builder->build(type, buildPos);
+
+    *foundBuilder = builder;
 
     return success;
 }
@@ -402,13 +403,15 @@ int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
 
 
 //NOW TRACKING (AS RELATES TO BUILDERS ONLY)
-//updates tracker AND initiates relevant commands based on result
 void Tracker::onFrame(){
     
     //builders
     std::vector<int> completedBuilders;
 
     for(auto& entry: BuilderList){
+        if(entry.second.unit == nullptr){
+            continue; //error checking
+        } 
         CommandResult result = didBuilderSucceed(entry.first, entry.second);
         if (result == FAIL_AND_RETRY) bq->addEntryNow(1, entry.second.buildType);
         if (result != ONGOING) completedBuilders.push_back(entry.first);

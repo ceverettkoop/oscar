@@ -5,6 +5,7 @@
 #pragma once
 
 #include "BuildOrder.h"
+#include "Macro.h"
 #include "MapTools.h"
 #include <BWAPI.h>
 #include <vector>
@@ -21,11 +22,7 @@ class Oscar : public BWAPI::AIModule
 public:
 
 	BuildQueue bq = BuildQueue();
-
-	//move to macro
-	BWAPI::TilePosition enemyLocation;
-	BWAPI::Unit scout = nullptr;
-	bool isScouting = false;
+	MacroManager macro = MacroManager();
 
     Oscar();
 
@@ -33,7 +30,6 @@ public:
     void sendIdleWorkersToMinerals();
     void drawDebugInformation();
 	void collectGas(int countPerGeyser);
-	void scouting(BWAPI::Unit scout, BWAPI::TilePosition enemyLocation);
 
     // functions that are triggered by various BWAPI events from main.cpp
 	void onStart();
@@ -47,7 +43,6 @@ public:
 	void onUnitShow(BWAPI::Unit unit);
 	void onUnitHide(BWAPI::Unit unit);
 	void onUnitRenegade(BWAPI::Unit unit);
-
 
 };
 

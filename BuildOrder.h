@@ -27,12 +27,11 @@ private:
 		int initBuildCount = 0;
 	};
 
-	std::map<int,Builder>BuilderList;
-
 public:
 
 	int lastKey = -1;
 	BuildQueue* bq;
+    std::map<int,Builder>BuilderList;
 
 	void onFrame();
 	int trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType); //returns index to tracked builder
@@ -89,7 +88,7 @@ private:
     Tracker track;
     InitialBuildOrder ibo = InitialBuildOrder();
     
-    bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit builder);
+    bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit* builder);
     BuildResult TrainUnit(BWAPI::UnitType type);
 
 

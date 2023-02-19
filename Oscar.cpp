@@ -43,8 +43,6 @@ void Oscar::onStart()
 
     bq.onStart(path);
 
-    //this will get kicked to macro object
-    enemyLocation = BWAPI::TilePositions::Unknown;
 }
 
 // Called on each frame of the game
@@ -63,17 +61,8 @@ void Oscar::onFrame()
     //All building of units or buildings
     bq.onFrame();
 
-    //scout - this will get moved
-    //TODO MOVE THIS ELSEWHERE; for now decision if we are scouting is here
-    if(enemyLocation == BWAPI::TilePositions::Unknown){
-        if(isScouting){
-            if(BWAPI::Broodwar->self()->supplyUsed() > 16){
-                isScouting = true;
-            }
-        }
-    }else(isScouting = false); //this is if we found the enemy
-
-    if (isScouting) scouting(scout, enemyLocation);
+    //Macro level troop movements
+    macro.onFrame();
 
 
     // Draw unit health bars, which brood war unfortunately does not do
@@ -151,35 +140,6 @@ void Oscar::drawDebugInformation(){
 
 }
 
-//this needs to get moved to macro
-void Oscar::scouting(BWAPI::Unit scout, BWAPI::TilePosition enemyLocation){
-
-
-    //assign scout if needed
-    if(scout == nullptr || !scout->exists()){ //if scout not assigned or dead
-            scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
-    }else scout = nullptr; //if not scouting release any unit from being called a scout
-
-
-    auto& startLocations = BWAPI::Broodwar->getStartLocations();
-
-    for(BWAPI::TilePosition tpos : startLocations){
-        if(BWAPI::Broodwar->isExplored(tpos)) continue;
-
-        BWAPI::Position pos(tpos);
-        scout->move(pos);
-
-        if(BWAPI::Broodwar->isExplored(tpos)){
-            BWAPI::Unitset baseUnits = BWAPI::Broodwar->getUnitsOnTile(tpos);
-            for(auto& unit : baseUnits){
-                if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) enemyLocation = tpos;
-            }    
-        }
-        
-        break;
-    }
-
-}
 
 // Called whenever the game ends and tells you if you won or not
 void Oscar::onEnd(bool isWinner)
