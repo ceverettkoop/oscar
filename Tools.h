@@ -1,5 +1,5 @@
 #include <BWAPI.h>
-#include "Oscar.h"
+
 
 namespace Tools
 {
@@ -12,9 +12,6 @@ namespace Tools
     BWAPI::Unitset GetUnitSetofType(BWAPI::UnitType type);
     BWAPI::Unit GetBuilder(BWAPI::UnitType type);
     BWAPI::Unit GetDepot();
-
-    bool BuildBuilding(BWAPI::UnitType type, Oscar* bot);
-    BuildResult TrainUnit(BWAPI::UnitType type);
 
     void DrawUnitBoundingBoxes();
     void DrawUnitCommands();

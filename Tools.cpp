@@ -86,64 +86,7 @@ BWAPI::Unit Tools::GetDepot()
     return GetUnitOfType(depot);
 }
 
-// Attempt tp construct a building of a given type 
-bool Tools::BuildBuilding(BWAPI::UnitType type, Oscar* bot){
-    bool foundBuilder = false;
 
-    // Get the type of unit that is required to build the desired building
-    BWAPI::UnitType builderType = type.whatBuilds().first;
-    // Get a unit that we own that is of the given type so it can build
-    // If we can't find a valid builder unit, then we have to cancel the building
-    BWAPI::Unit builder = Tools::GetBuilder(builderType);
-    if (!builder) { return false; }
-
-    // Get a location that we want to build the building next to
-    BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
-
-    // Ask BWAPI for a building location near the desired position for the type
-    int maxBuildRange = 64;
-    bool buildingOnCreep = type.requiresCreep();
-    BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
-    
-    bool success = builder->build(type, buildPos);
-
-    //TODO track the builder to make sure it actually initiated the building before moving on
-    //once tracked a seperate function will update status and if unit fails will re-add building to queue
-    if (success){
-        bot->track.trackBuilder(builder, type);
-    }
-    
-
-    return success;
-}
-
-BuildResult Tools::TrainUnit(BWAPI::UnitType type){
-
-    //GETTING SOURCE BUILDING IGNORING ARCHONS for now
-    BWAPI::UnitType trainerType = type.whatBuilds().first;
-    BWAPI::Unitset trainerSet;
-
-    // For each unit that we own
-    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
-        // if the unit is of the correct type and it actually has been constructed, add it to set
-        if (unit->getType() == trainerType && unit->isCompleted()){
-            trainerSet.insert(unit);
-        }
-    }
-
-    if(trainerSet.size() == 0) return NO_TRAINER;
-
-    for (auto& trainer : trainerSet){
-        if (!trainer->isTraining()){
-            if (trainer->train(type)){
-                return QUEUED; //success
-            }else return FAILED; //failed for some reason
-        }
-    }
-
-    return QUEUE_FULL; //presumably all trainers full
-    
-}
 
 
 

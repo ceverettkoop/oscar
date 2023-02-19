@@ -1,119 +1,73 @@
-#include "Oscar.h"
-#include <BWAPI.h>
+//Really manages everything to do with building buildings or trainingu nits
+
+#include "BuildOrder.h"
 #include <fstream>
 #include "Tools.h"
 
+//first all BQ functions; then IBO (should be folded in later); then tracker
 
-void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
-
-    int supplyCount = dblSupplyCount; //ibo was doubled already whoops
-        
-    //assume constant droning unless flagged no or switched below
-    bool droning = true;
-    BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
-    BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-
-    /*//cut drones if next one will eff pylon
-    if(ibo_unitType[curStep+1] == pylon && ( (supplyCount + 2) >= ibo_supplyCount[curStep+1] ) ){
-        if( BWAPI::Broodwar->self()->minerals() < 150)  droning = false;
-    }*/
-
-    if(droning){ 
-        bot->bq.addEntryNow(1, worker);
-    }
-
-    //also build prescribed building or unit but only one per step   
-    for (int i = 0; i < ibo_supplyCount.size(); ++i){
-        if (supplyCount >= ibo_supplyCount[i]){
-            curStep = i;
-            if (lastStep < curStep){ //if new step 
-                bot->bq.addEntryNow(1, ibo_unitType[i]); //queue one up
-                if (supplyCount >= ibo_supplyCount.back()) isFinished = true;
-                *targetCount = ibo_supplyCount[i];
-                lastStep = curStep; //reset step check
-                return;
-            }
-        }
-    } 
+void BuildQueue::onStart(char* iboPath){
+    ibo.load_ibo(iboPath);
+    ibo.bq = this;
+    track.bq = this;
 }
 
-//take a file of integers seperated by space or newline of the format:
-//supplycount unittype \n supplycount unittype etc etc
-//returns -1 on failure otherwise returns # of steps found in build order
-int InitialBuildOrder::load_ibo(char* path){
 
-    std::ifstream infile (path);
-    std::string instring;
-    char inchar;
-    int inint;
-    bool isCount = true;
-    int i = 0;
+//Iterate through entries in building queue and build what we are supposed to build
+void BuildQueue::onFrame(){
+
+    updateQueue();
+
+    for (int i = 0; i < next.size(); i++){
+        
+        BWAPI::UnitType nextUnit = next[i].type;
     
-    if(infile.is_open()){
-        while (infile.good()){
-            inchar = infile.get();
-            if (inchar == '#') break; //indicates end of ibo at #
-            if( inchar != ' ' && inchar != '\n'){
-                instring += inchar;
-            }else{ //presumably we have an int
-                inint = std::stoi(instring, NULL);
-                if(isCount){
-                    ibo_supplyCount.push_back(inint);
-                    isCount = false;
-                    instring.clear();
-                }else{
-                    ibo_unitType.push_back(BWAPI::UnitType(inint));
-                    isCount = true;
-                    i++;
-                    instring.clear();
+        int countToBuild = updateQty(i); //check how many to build
+        if (countToBuild < 1 ) continue;
+    
+        bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
+            nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
+            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed()));
+
+        if(canAfford){
+            if(nextUnit.isBuilding()){
+                bool built = false;
+                for (int n = 0; n < countToBuild; ++n){
+                    BWAPI::Unit builder;
+                    if(built = BuildBuilding(nextUnit, builder)) next[i].countBuiltNow++;
+                        if (built){track.trackBuilder(builder, nextUnit);
+                        }
+                }
+                
+            }else{
+                for (int n = 0; n < countToBuild; ++n){
+                    if(TrainUnit(nextUnit) == QUEUED) next[i].countBuiltNow++;
                 }
             }
         }
-        
-    }else {
-        fprintf(stderr, "Failed to load input file\n");
-        stepCount = 0;
-        return -1;
+
+        //somehow i think putting this after the build commands helps idk
+        if (!onIbo) queueNextPrereq(nextUnit);
     }
 
-    stepCount = i;
-
-    //doubling supply values to match API!
-    for (size_t n = 0; n < ibo_supplyCount.size(); n++){
-        ibo_supplyCount[n] = (ibo_supplyCount[n]) * 2;
-    }
+    //tracker updates
+    track.onFrame();
     
-
-    return i;
-
+    return;
+    
 }
 
-int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
-    int currentStep = 0;
-    int countDesired = 0;
-    for(int i = 0; i < ibo_supplyCount.size(); i++){
-        if(ibo_supplyCount[i] <=  BWAPI::Broodwar->self()->supplyUsed())
-            currentStep = i;
-    }
-
-    for(int i = 0; i <= currentStep; i++){
-        if(ibo_unitType[i] == type)
-            countDesired++;
-    }
-
-    return countDesired;
-
-}
+//THIS IS CURRENTLY WHERE ALL STRATEGY IS INLINED BEYOND IBO
 
 //update queue, taking into account of last attempt to build queued unit
 void BuildQueue::updateQueue(){
     int targetCount = 0;
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
-    if(bot->ibo.isFinished) onIbo = false; //only leaves ibo if over; will add other conditions
+    if(ibo.isFinished) onIbo = false; //only leaves ibo if over; will add other conditions
     
     //logic for initial build order 
     if(onIbo){
-        bot->ibo.nextStep(BWAPI::Broodwar->self()->supplyUsed(), &targetCount);
+        ibo.nextStep(BWAPI::Broodwar->self()->supplyUsed(), &targetCount);
 
     }else{ //past ibo behavior
 
@@ -142,39 +96,11 @@ void BuildQueue::updateQueue(){
 
     }
 
-        
-//skippin goal nonsense for now      
-/*        BuildGoal goal = GetGoal(supplyUsed, droneCount, baseCount);
-            
-        switch(goal){ //goal busted maybe will get canned
-
-            case BUILD_ZEALOTS:
-                bool buildingZealot = false; 
-                for (size_t i = 0; i < next.size(); i++){
-                    if (next[i].type == BWAPI::UnitTypes::Protoss_Zealot ) buildingZealot = true;
-                }
-                if (!buildingZealot) next.push_back(QueueEntry(BWAPI::UnitTypes::Protoss_Zealot));
-                break;
-            }
-            
-        }
-*/
-
+    
 }
 
-//this does nothing rn
-BuildGoal BuildQueue::GetGoal(int supplyUsed, int droneCount, int baseCount){
 
-    int boSupply = supplyUsed / 2;
-    //inline for now will append to IBO later;
-    if(boSupply < 30){
-        return BUILD_ZEALOTS;
-    }else if (baseCount < 2 ){
-        return BUILD_ZEALOTS; //this will be expand later
-    }else 
-        return BUILD_ZEALOTS;
 
-}
 
 void BuildQueue::addEntryNow(int count, BWAPI::UnitType type){
 
@@ -312,5 +238,224 @@ BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
     //if we didn't find any reqs
     return BWAPI::UnitTypes::None;
+}
+
+
+
+// Attempt tp construct a building of a given type 
+bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit builder){
+    bool foundBuilder = false;
+
+    // Get the type of unit that is required to build the desired building
+    BWAPI::UnitType builderType = type.whatBuilds().first;
+    // Get a unit that we own that is of the given type so it can build
+    // If we can't find a valid builder unit, then we have to cancel the building
+    builder = Tools::GetBuilder(builderType);
+    if (!builder) { return false; }
+
+    // Get a location that we want to build the building next to
+    BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
+
+    // Ask BWAPI for a building location near the desired position for the type
+    int maxBuildRange = 64;
+    bool buildingOnCreep = type.requiresCreep();
+    BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
+    
+    bool success = builder->build(type, buildPos);
+
+    return success;
+}
+
+BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
+
+    //GETTING SOURCE BUILDING IGNORING ARCHONS for now
+    BWAPI::UnitType trainerType = type.whatBuilds().first;
+    BWAPI::Unitset trainerSet;
+
+    // For each unit that we own
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        // if the unit is of the correct type and it actually has been constructed, add it to set
+        if (unit->getType() == trainerType && unit->isCompleted()){
+            trainerSet.insert(unit);
+        }
+    }
+
+    if(trainerSet.size() == 0) return NO_TRAINER;
+
+    for (auto& trainer : trainerSet){
+        if (!trainer->isTraining()){
+            if (trainer->train(type)){
+                return QUEUED; //success
+            }else return FAILED; //failed for some reason
+        }
+    }
+
+    return QUEUE_FULL; //presumably all trainers full
+    
+}
+
+
+//NOW IBO PARSING
+
+
+void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
+
+    int supplyCount = dblSupplyCount; //ibo was doubled already whoops
+        
+    //assume constant droning unless flagged no or switched below
+    bool droning = true;
+    BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
+    BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+
+    /*//cut drones if next one will eff pylon
+    if(ibo_unitType[curStep+1] == pylon && ( (supplyCount + 2) >= ibo_supplyCount[curStep+1] ) ){
+        if( BWAPI::Broodwar->self()->minerals() < 150)  droning = false;
+    }*/
+
+    if(droning){ 
+        bq->addEntryNow(1, worker);
+    }
+
+    //also build prescribed building or unit but only one per step   
+    for (int i = 0; i < ibo_supplyCount.size(); ++i){
+        if (supplyCount >= ibo_supplyCount[i]){
+            curStep = i;
+            if (lastStep < curStep){ //if new step 
+                bq->addEntryNow(1, ibo_unitType[i]); //queue one up
+                if (supplyCount >= ibo_supplyCount.back()) isFinished = true;
+                *targetCount = ibo_supplyCount[i];
+                lastStep = curStep; //reset step check
+                return;
+            }
+        }
+    } 
+}
+
+//take a file of integers seperated by space or newline of the format:
+//supplycount unittype \n supplycount unittype etc etc
+//returns -1 on failure otherwise returns # of steps found in build order
+int InitialBuildOrder::load_ibo(char* path){
+
+    std::ifstream infile (path);
+    std::string instring;
+    char inchar;
+    int inint;
+    bool isCount = true;
+    int i = 0;
+    
+    if(infile.is_open()){
+        while (infile.good()){
+            inchar = infile.get();
+            if (inchar == '#') break; //indicates end of ibo at #
+            if( inchar != ' ' && inchar != '\n'){
+                instring += inchar;
+            }else{ //presumably we have an int
+                inint = std::stoi(instring, NULL);
+                if(isCount){
+                    ibo_supplyCount.push_back(inint);
+                    isCount = false;
+                    instring.clear();
+                }else{
+                    ibo_unitType.push_back(BWAPI::UnitType(inint));
+                    isCount = true;
+                    i++;
+                    instring.clear();
+                }
+            }
+        }
+        
+    }else {
+        fprintf(stderr, "Failed to load input file\n");
+        stepCount = 0;
+        return -1;
+    }
+
+    stepCount = i;
+
+    //doubling supply values to match API!
+    for (size_t n = 0; n < ibo_supplyCount.size(); n++){
+        ibo_supplyCount[n] = (ibo_supplyCount[n]) * 2;
+    }
+    
+
+    return i;
+
+}
+
+int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
+    int currentStep = 0;
+    int countDesired = 0;
+    for(int i = 0; i < ibo_supplyCount.size(); i++){
+        if(ibo_supplyCount[i] <=  BWAPI::Broodwar->self()->supplyUsed())
+            currentStep = i;
+    }
+
+    for(int i = 0; i <= currentStep; i++){
+        if(ibo_unitType[i] == type)
+            countDesired++;
+    }
+
+    return countDesired;
+
+}
+
+
+
+//NOW TRACKING (AS RELATES TO BUILDERS ONLY)
+//updates tracker AND initiates relevant commands based on result
+void Tracker::onFrame(){
+    
+    //builders
+    std::vector<int> completedBuilders;
+
+    for(auto& entry: BuilderList){
+        CommandResult result = didBuilderSucceed(entry.first, entry.second);
+        if (result == FAIL_AND_RETRY) bq->addEntryNow(1, entry.second.buildType);
+        if (result != ONGOING) completedBuilders.push_back(entry.first);
+    }
+
+    //delete former builders
+    for(auto& key: completedBuilders){
+        BuilderList.erase(key);
+    }
+
+    
+    
+}
+
+ //returns key to tracked builder
+int Tracker::trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
+    
+    int key = lastKey + 1;
+
+    Builder input;
+    input.unit = unit;
+    input.buildType = buildType;
+    input.initBuildCount = Tools::CountUnitsOfType(buildType,BWAPI::Broodwar->self()->getUnits());
+    BuilderList.insert({key, input});
+    lastKey = key;
+
+    return key;
+
+}
+
+//if success builder is auto removed from tracking
+CommandResult Tracker::didBuilderSucceed(int key, Builder found){
+
+    //assuming as soon as it's done building it will be issued a new command
+
+    //BWAPI::UnitCommand command = found.unit->getLastCommand();
+
+    //assume buildtype matches unit is on the way
+    if(found.unit->getBuildType() != found.buildType){
+        int newCount = Tools::CountUnitsOfType(found.buildType,BWAPI::Broodwar->self()->getUnits());
+        if (newCount <= found.initBuildCount){ 
+            return FAIL_AND_RETRY;
+        }else{
+            return SUCCESS;}
+    }else{
+        return ONGOING;
+    }
+
 }
 

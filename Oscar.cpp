@@ -7,8 +7,6 @@
 #include <cstring>
 #include "Oscar.h"
 #include "Tools.h"
-#include "MapTools.h"
-#include "BWEM/bwem.h"
 
 
 Oscar::Oscar()
@@ -43,7 +41,10 @@ void Oscar::onStart()
     strncat(path,"/bwapi-data/read/2gatewaypvz", 111);
     fprintf(stderr,"IBO path is %s\n", path);
 
-    ibo.load_ibo(path);
+    bq.onStart(path);
+
+    //this will get kicked to macro object
+    enemyLocation = BWAPI::TilePositions::Unknown;
 }
 
 // Called on each frame of the game
@@ -59,20 +60,21 @@ void Oscar::onFrame()
     //and if we have an assimilator
     collectGas(3);
 
-    //built next unit/building or wait for money to accrue
-    buildNext();
-
-    //check on builders etc
-    track.onFrame();
+    //All building of units or buildings
+    bq.onFrame();
 
     //scout - this will get moved
-    if(gs.scouting) scout();
+    //TODO MOVE THIS ELSEWHERE; for now decision if we are scouting is here
+    if(enemyLocation == BWAPI::TilePositions::Unknown){
+        if(isScouting){
+            if(BWAPI::Broodwar->self()->supplyUsed() > 16){
+                isScouting = true;
+            }
+        }
+    }else(isScouting = false); //this is if we found the enemy
 
-    // Train more workers so we can gather more income
-    //trainAdditionalWorkers();
+    if (isScouting) scouting(scout, enemyLocation);
 
-    // Build more supply if we are going to run out soon
-    //buildAdditionalSupply();
 
     // Draw unit health bars, which brood war unfortunately does not do
     //Tools::DrawUnitHealthBars();
@@ -149,19 +151,28 @@ void Oscar::drawDebugInformation(){
 
 }
 
-void Oscar::scout(){
+//this needs to get moved to macro
+void Oscar::scouting(BWAPI::Unit scout, BWAPI::TilePosition enemyLocation){
+
+
+    //assign scout if needed
+    if(scout == nullptr || !scout->exists()){ //if scout not assigned or dead
+            scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
+    }else scout = nullptr; //if not scouting release any unit from being called a scout
+
+
     auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
     for(BWAPI::TilePosition tpos : startLocations){
         if(BWAPI::Broodwar->isExplored(tpos)) continue;
 
         BWAPI::Position pos(tpos);
-        track.scout->move(pos);
+        scout->move(pos);
 
         if(BWAPI::Broodwar->isExplored(tpos)){
             BWAPI::Unitset baseUnits = BWAPI::Broodwar->getUnitsOnTile(tpos);
             for(auto& unit : baseUnits){
-                if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) gs.enemyLocation = tpos;
+                if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) enemyLocation = tpos;
             }    
         }
         
@@ -231,41 +242,4 @@ void Oscar::onUnitHide(BWAPI::Unit unit)
 void Oscar::onUnitRenegade(BWAPI::Unit unit)
 { 
 	
-}
-
-//Iterate through entries in building queue and build what we are supposed to build
-void Oscar::buildNext(){
-
-    bq.updateQueue();
-
-    for (int i = 0; i < bq.next.size(); i++){
-        
-        BWAPI::UnitType nextUnit = bq.next[i].type;
-    
-        int countToBuild = bq.updateQty(i); //check how many to build
-        if (countToBuild < 1 ) continue;
-    
-        bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
-            nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
-            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed()));
-
-        if(canAfford){
-            if(nextUnit.isBuilding()){
-                for (int n = 0; n < countToBuild; ++n){
-                    if(Tools::BuildBuilding(nextUnit, this)) bq.next[i].countBuiltNow++;
-                }
-                
-            }else{
-                for (int n = 0; n < countToBuild; ++n){
-                    if(Tools::TrainUnit(nextUnit) == QUEUED) bq.next[i].countBuiltNow++;
-                }
-            }
-        }
-
-        //somehow i think putting this after the build commands helps idk
-        if (!bq.onIbo) bq.queueNextPrereq(nextUnit);
-    }
-    
-    return;
-    
 }
