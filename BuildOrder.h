@@ -90,10 +90,13 @@ private:
     
     bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit* builder);
     BuildResult TrainUnit(BWAPI::UnitType type);
-
+	void clearEmptyEntries();
 
 public:
 
+	int supplyCommited = 0;
+	int minCommited = 0;
+	int gasCommited = 0;
 	int baseCount = 1;
 	static const int maxSize = 5;
 	std::vector<QueueEntry> next; //types of things we are currently trying to build

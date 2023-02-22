@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Grid.hpp" />
+    <ClInclude Include="Macro.h" />
     <ClInclude Include="MapTools.h" />
     <ClInclude Include="ReplayParser.h" />
     <ClInclude Include="Oscar.h" />
@@ -28,12 +29,12 @@
   <ItemGroup>
     <ClCompile Include="BuildOrder.cpp" />
     <ClCompile Include="Dll.cpp" />
+    <ClCompile Include="Macro.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapTools.cpp" />
     <ClCompile Include="ReplayParser.cpp" />
     <ClCompile Include="Oscar.cpp" />
     <ClCompile Include="Tools.cpp" />
-    <ClCompile Include="Tracker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>Oscar</ProjectName>
@@ -231,7 +232,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>../src/bwapi/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:/Users/sean/BWAPI/include;../include;../src/bwapi/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;EXAMPLEAIMODULE_EXPORTS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>

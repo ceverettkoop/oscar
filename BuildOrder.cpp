@@ -18,6 +18,7 @@ void BuildQueue::onFrame(){
 
     updateQueue();
 
+    //iterate through every item in queue
     for (int i = 0; i < next.size(); i++){
         
         BWAPI::UnitType nextUnit = next[i].type;
@@ -25,29 +26,39 @@ void BuildQueue::onFrame(){
         int countToBuild = updateQty(i); //check how many to build
         if (countToBuild < 1 ) continue;
     
-        bool canAfford = ( nextUnit.mineralPrice() <= BWAPI::Broodwar->self()->minerals() && 
-            nextUnit.gasPrice() <= BWAPI::Broodwar->self()->minerals() &&
-            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed()));
+        //checks for gas min and supply against what we have as well as what we have already set aside
+        bool canAfford = ( nextUnit.mineralPrice() <= (BWAPI::Broodwar->self()->minerals() - minCommited) && 
+            nextUnit.gasPrice() <= (BWAPI::Broodwar->self()->minerals() - gasCommited) &&
+            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed() - supplyCommited)  );
 
         if(canAfford){
             if(nextUnit.isBuilding()){
                 bool built = false;
                 for (int n = 0; n < countToBuild; ++n){
                     BWAPI::Unit foundBuilder;
-                    if(built = BuildBuilding(nextUnit, &foundBuilder)) next[i].countBuiltNow++;
-                        if (built){track.trackBuilder(foundBuilder, nextUnit);
-                        }
+                    built = BuildBuilding(nextUnit, &foundBuilder);
+                    if(built){
+                        next[i].countBuiltNow++; //tell queue we did it
+                        track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
+                        //set aside money
+                        minCommited += nextUnit.mineralPrice();
+                        gasCommited += nextUnit.gasPrice();
+                        supplyCommited += nextUnit.supplyRequired(); 
+                    }
+                    
                 }
-                
             }else{
                 for (int n = 0; n < countToBuild; ++n){
                     if(TrainUnit(nextUnit) == QUEUED) next[i].countBuiltNow++;
+                //should not need to set aside money here because it's either spent or it's not
                 }
             }
         }
 
         //somehow i think putting this after the build commands helps idk
+        //adds prereqs to queue if we have need
         if (!onIbo) queueNextPrereq(nextUnit);
+        clearEmptyEntries();
     }
 
     //tracker updates
@@ -414,7 +425,12 @@ void Tracker::onFrame(){
         } 
         CommandResult result = didBuilderSucceed(entry.first, entry.second);
         if (result == FAIL_AND_RETRY) bq->addEntryNow(1, entry.second.buildType);
-        if (result != ONGOING) completedBuilders.push_back(entry.first);
+        if (result != ONGOING){ //we either built or failed; either way release the funds 
+            completedBuilders.push_back(entry.first);
+            bq->gasCommited -= entry.second.buildType.gasPrice();
+            bq->minCommited -= entry.second.buildType.mineralPrice();
+            bq->supplyCommited -= entry.second.buildType.supplyRequired(); //this maybe makes no sense to track?
+        }
     }
 
     //delete former builders
@@ -422,8 +438,6 @@ void Tracker::onFrame(){
         BuilderList.erase(key);
     }
 
-    
-    
 }
 
  //returns key to tracked builder
@@ -458,6 +472,15 @@ CommandResult Tracker::didBuilderSucceed(int key, Builder found){
             return SUCCESS;}
     }else{
         return ONGOING;
+    }
+
+}
+
+void BuildQueue::clearEmptyEntries(){
+
+    for (auto& entry : next){
+        if(entry.countWantedNow < 1 && entry.countWantedTotal < 1)
+        rmEntry(entry.type);
     }
 
 }
