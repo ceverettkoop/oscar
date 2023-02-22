@@ -58,11 +58,11 @@ void BuildQueue::onFrame(){
         //somehow i think putting this after the build commands helps idk
         //adds prereqs to queue if we have need
         if (!onIbo) queueNextPrereq(nextUnit);
-        clearEmptyEntries();
     }
 
     //tracker updates
     track.onFrame();
+    clearEmptyEntries();
     
     return;
     
@@ -479,7 +479,7 @@ CommandResult Tracker::didBuilderSucceed(int key, Builder found){
 void BuildQueue::clearEmptyEntries(){
 
     for (auto& entry : next){
-        if(entry.countWantedNow < 1 && entry.countWantedTotal < 1)
+        if(entry.buildQty < 1)
         rmEntry(entry.type);
     }
 

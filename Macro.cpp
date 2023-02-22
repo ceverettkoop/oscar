@@ -9,7 +9,7 @@ void MacroManager::onFrame(){
     //are we scouting?
     //TODO MOVE THIS ELSEWHERE
     if(enemyLocation == BWAPI::TilePositions::Unknown){
-        if(isScouting){
+        if(!isScouting){
             if(BWAPI::Broodwar->self()->supplyUsed() > 16){
                 isScouting = true;
             }
