@@ -52,3 +52,4 @@ public:
     bool    isDepotBuildableTile(int tileX, int tileY) const;
     void    drawTile(int tileX, int tileY, const BWAPI::Color & color) const;
 };
+

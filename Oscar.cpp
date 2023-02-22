@@ -24,12 +24,13 @@ void Oscar::onStart()
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
-    // Call MapTools OnStart
+    // Call MapTools OnStart TODO supplant this with BWEM
     m_mapTools.onStart();
 
     //Initalize BWEM, will replace above if possible
     BWEM::Map::Instance().Initialize(BWAPI::BroodwarPtr);
     BWEM::Map::Instance().EnableAutomaticPathAnalysis();
+    BWEM::Map::Instance().FindBasesForStartingLocations();
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
