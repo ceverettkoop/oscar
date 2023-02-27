@@ -9,11 +9,6 @@
 #include "Tools.h"
 
 
-Oscar::Oscar()
-{
-    
-}
-
 // Called when the bot starts!
 void Oscar::onStart()
 {
@@ -24,13 +19,16 @@ void Oscar::onStart()
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
-    // Call MapTools OnStart TODO supplant this with BWEM
+    // Call MapTools OnStart TODO: eliminate this
     m_mapTools.onStart();
 
     //Initalize BWEM, will replace above if possible
     BWEM::Map::Instance().Initialize(BWAPI::BroodwarPtr);
     BWEM::Map::Instance().EnableAutomaticPathAnalysis();
     BWEM::Map::Instance().FindBasesForStartingLocations();
+
+    //start internal map manager
+    map.onStart();
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
@@ -63,8 +61,7 @@ void Oscar::onFrame()
     bq.onFrame();
 
     //Macro level troop movements
-    macro.onFrame();
-
+    macro.onFrame(&gs);
 
     // Draw unit health bars, which brood war unfortunately does not do
     //Tools::DrawUnitHealthBars();

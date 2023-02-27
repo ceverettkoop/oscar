@@ -19,19 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Decider.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="Grid.hpp" />
     <ClInclude Include="Macro.h" />
     <ClInclude Include="MapTools.h" />
+    <ClInclude Include="OscarMap.h" />
     <ClInclude Include="ReplayParser.h" />
     <ClInclude Include="Oscar.h" />
     <ClInclude Include="Tools.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BuildOrder.cpp" />
+    <ClCompile Include="Decider.cpp" />
     <ClCompile Include="Dll.cpp" />
     <ClCompile Include="Macro.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapTools.cpp" />
+    <ClCompile Include="OscarMap.cpp" />
     <ClCompile Include="ReplayParser.cpp" />
     <ClCompile Include="Oscar.cpp" />
     <ClCompile Include="Tools.cpp" />

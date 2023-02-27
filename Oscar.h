@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "GameState.h"
+#include "OscarMap.h"
 #include "BuildOrder.h"
 #include "Macro.h"
 #include "MapTools.h"
@@ -21,10 +23,12 @@ class Oscar : public BWAPI::AIModule
 
 public:
 
+	GameState gs;
 	BuildQueue bq = BuildQueue();
 	MacroManager macro = MacroManager();
+	OscarMap map = OscarMap();
 
-    Oscar();
+    Oscar(){};
 
 	//general bot actions
     void sendIdleWorkersToMinerals();

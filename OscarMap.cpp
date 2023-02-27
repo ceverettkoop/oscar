@@ -4,8 +4,6 @@
 #include <vector>
 #include <cfloat>
 
-using namespace std;
-using namespace BWEM;
 
 void OscarMap::onStart(){
 
@@ -13,13 +11,8 @@ void OscarMap::onStart(){
 
 }
 
-
-
-
-
-
 //code here largely taken from BWEB
-//using BWAPI dum dumb distance algo instead of smart one
+//using BWEM distance algo instead of BWEB one
 //https://github.com/Cmccrave/BWEB/
 void OscarMap::findBases(){
 
@@ -47,7 +40,7 @@ void OscarMap::findBases(){
                     || base.Minerals().size() < 5)
                     continue;
                 
-                const CPPath & Path = BWEM::Map::Instance().GetPath(main->Center(), base.Center() );
+                const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(main->Center(), base.Center() );
                 const auto dist = Path.size();
 
                 if (dist < distBest && dist < 1600.0) {
@@ -68,7 +61,7 @@ void OscarMap::findBases(){
                     if (base.Starting())
                         continue;
 
-                const CPPath & Path = BWEM::Map::Instance().GetPath(main->Center(), base.Center() );
+                const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(main->Center(), base.Center() );
                 const auto dist = Path.size();
 
                     if (dist < distBest) {

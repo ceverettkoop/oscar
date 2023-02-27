@@ -1,23 +1,14 @@
 //brute commands to units or groups of units
 //micro happens after
 
+#include "GameState.h"
 #include "Macro.h"
+#include "Decider.h"
 #include "Tools.h"
 
-void MacroManager::onFrame(){
+void MacroManager::onFrame(GameState* gs){
 
-    //are we scouting?
-    //TODO MOVE THIS ELSEWHERE
-    if(enemyLocation == BWAPI::TilePositions::Unknown){
-        if(!isScouting){
-            if(BWAPI::Broodwar->self()->supplyUsed() > 16){
-                isScouting = true;
-            }
-        }
-    }else(isScouting = false); //this is if we found the enemy
-
-    if(isScouting) scouting(scout, enemyLocation);
-
+    if(gs->scouting) scouting(scout, enemyLocation);
 }
 
 void MacroManager::scouting(BWAPI::Unit scout, BWAPI::TilePosition enemyLocation){

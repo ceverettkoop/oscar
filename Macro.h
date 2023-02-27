@@ -1,5 +1,6 @@
 #include <BWAPI.h>
 
+
 class MacroManager;
 
 class MacroManager{
@@ -12,6 +13,7 @@ private:
     void scouting(BWAPI::Unit scout, BWAPI::TilePosition enemyLocation);
 
 public:
-    void onFrame();
+    void onFrame(GameState* gs);
 
 };
+
