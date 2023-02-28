@@ -11,6 +11,10 @@ void OscarMap::onStart(){
 
 }
 
+void OscarMap::onFrame(){
+    
+}
+
 //code here largely taken from BWEB
 //using BWEM distance algo instead of BWEB one
 //https://github.com/Cmccrave/BWEB/

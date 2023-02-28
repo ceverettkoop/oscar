@@ -1,5 +1,6 @@
 #include "Decider.h"
 #include "OscarMap.h"
+#include "GameState.h"
 
 
 void Decider::onFrame(GameState* gs){
@@ -17,11 +18,9 @@ void Decider::setScouting(GameState* gs){
     const int scoutStart = 16;
 
     if(gs->mapPtr->enemyMain == nullptr){
-        if(gs->scouting){
             if(BWAPI::Broodwar->self()->supplyUsed() > scoutStart){
-                gs->scouting = true;
+                gs->isScouting = true;
             }
-        }
-    }else(gs->scouting = false); //this is if we found the enemy
+    }else(gs->isScouting = false); //this is if we found the enemy
 
 }

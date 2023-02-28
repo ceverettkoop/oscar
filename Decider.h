@@ -1,6 +1,7 @@
+#pragma once
 #include <BWAPI.h>
-#include "GameState.h"
 
+class GameState;
 
 class Decider{
 

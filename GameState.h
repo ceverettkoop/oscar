@@ -7,6 +7,6 @@ class OscarMap;
 class GameState{
     
 public:
-    bool scouting;
+    bool isScouting = false;
     OscarMap* mapPtr;
 };

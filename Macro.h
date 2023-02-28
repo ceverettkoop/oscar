@@ -7,7 +7,7 @@ private:
 	BWAPI::Unit scout = nullptr;
 	bool isScouting = false;
 
-    void scouting(BWAPI::Unit scout, GameState* gs);
+    void scouting(GameState* gs);
 
 public:
     void onFrame(GameState* gs);

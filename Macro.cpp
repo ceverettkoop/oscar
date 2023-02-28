@@ -9,10 +9,10 @@
 
 void MacroManager::onFrame(GameState* gs){
 
-    if(gs->scouting) scouting(scout, gs);
+    if(gs->isScouting) scouting(gs);
 }
 
-void MacroManager::scouting(BWAPI::Unit scout, GameState* gs){
+void MacroManager::scouting(GameState* gs){
 
     //will get changed to base when base found
     BWAPI::TilePosition enemyLocation = BWAPI::TilePositions::Unknown;
@@ -20,7 +20,7 @@ void MacroManager::scouting(BWAPI::Unit scout, GameState* gs){
     //assign scout if needed
     if(scout == nullptr || !scout->exists()){ //if scout not assigned or dead
             scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
-    }else scout = nullptr; //if not scouting release any unit from being called a scout
+    }
 
     auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
