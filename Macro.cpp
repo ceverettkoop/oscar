@@ -9,10 +9,10 @@
 
 void MacroManager::onFrame(GameState* gs){
 
-    if(gs->scouting) scouting(scout, gs->mapPtr->enemyMain);
+    if(gs->scouting) scouting(scout, gs);
 }
 
-void MacroManager::scouting(BWAPI::Unit scout, BWEM::Base* enemyMain){
+void MacroManager::scouting(BWAPI::Unit scout, GameState* gs){
 
     //will get changed to base when base found
     BWAPI::TilePosition enemyLocation = BWAPI::TilePositions::Unknown;
@@ -35,8 +35,12 @@ void MacroManager::scouting(BWAPI::Unit scout, BWEM::Base* enemyMain){
             for(auto& unit : baseUnits){
                 if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) enemyLocation = tpos;
                 
-                //TODO CAST TPOS INTO A BWEM BASE AND STORE IT IN GS->ENEMYMAIN
-
+                for(auto& base : gs->mapPtr->mainBases){
+                    if(base->Location() == tpos){
+                        gs->mapPtr->enemyMain = base;
+                    }
+                }
+                
             }    
         }
         
