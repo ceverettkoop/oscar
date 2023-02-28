@@ -11,6 +11,6 @@ public:
     void onFrame(GameState* gs);
 
 private:
-    bool setScouting(GameState* gs);
+    void setScouting(GameState* gs);
 
 };

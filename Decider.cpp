@@ -7,13 +7,12 @@ void Decider::onFrame(GameState* gs){
     //decide if we are scouting
     setScouting(gs);
 
-
 }
 
 
 //logic to scout at X supply until we find the enemy
 //will be made more complicated
-bool Decider::setScouting(GameState* gs){
+void Decider::setScouting(GameState* gs){
 
     const int scoutStart = 16;
 
