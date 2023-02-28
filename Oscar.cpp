@@ -29,6 +29,8 @@ void Oscar::onStart()
 
     //start internal map manager
     map.onStart();
+    //allow global gamestate variable to access our map info
+    gs.mapPtr = &map;
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
@@ -50,6 +52,12 @@ void Oscar::onFrame()
     // Update our MapTools information
     m_mapTools.onFrame();
 
+    //Update Oscars map tools
+    map.onFrame();
+
+    //Make decisions; pass it the gamestate
+    decider.onFrame(&gs);
+
     // Send our idle workers to mine minerals so they don't just stand there
     sendIdleWorkersToMinerals();
 
@@ -60,7 +68,7 @@ void Oscar::onFrame()
     //All building of units or buildings
     bq.onFrame();
 
-    //Macro level troop movements
+    //Macro level troop movements; pass it the gamestate
     macro.onFrame(&gs);
 
     // Draw unit health bars, which brood war unfortunately does not do

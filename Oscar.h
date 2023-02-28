@@ -5,6 +5,7 @@
 #pragma once
 
 #include "GameState.h"
+#include "Decider.h"
 #include "OscarMap.h"
 #include "BuildOrder.h"
 #include "Macro.h"
@@ -23,6 +24,7 @@ class Oscar : public BWAPI::AIModule
 
 public:
 
+	Decider decider;
 	GameState gs;
 	BuildQueue bq = BuildQueue();
 	MacroManager macro = MacroManager();

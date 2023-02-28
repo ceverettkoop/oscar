@@ -1,5 +1,11 @@
 #include <BWAPI.h>
+#include "BWEM/bwem.h"
 
-struct GameState{
+class OscarMap;
+
+class GameState{
+    
+public:
     bool scouting;
+    OscarMap* mapPtr;
 };

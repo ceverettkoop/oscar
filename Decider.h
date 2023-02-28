@@ -7,8 +7,8 @@ class Decider{
 public:  
     Decider(){};
     
-    void onStart();
-    void onFrame();
+    void onStart(GameState* gs);
+    void onFrame(GameState* gs);
 
 private:
     bool setScouting(GameState* gs);

@@ -6,12 +6,12 @@
 class OscarMap{
 
 public:
-    BWEM::Base* main;
-    BWEM::Base* natural;
-    BWEM::Base* nextExp;
+    BWEM::Base* main = nullptr;
+    BWEM::Base* natural = nullptr;
+    BWEM::Base* nextExp = nullptr;
 
-    BWEM::Base* enemyMain;
-    BWEM::Base* enemyNatural;
+    BWEM::Base* enemyMain = nullptr;
+    BWEM::Base* enemyNatural = nullptr;
 
     std::vector<const BWEM::Base*> mainBases;
     std::vector<const BWEM::Base*> natBases;
