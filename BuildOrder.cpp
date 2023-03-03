@@ -36,7 +36,7 @@ void BuildQueue::onFrame(){
                 bool built = false;
                 for (int n = 0; n < countToBuild; ++n){
                     BWAPI::Unit foundBuilder;
-                    built = BuildBuilding(nextUnit, &foundBuilder);
+                    built = BuildBuilding(nextUnit, &foundBuilder, BWAPI::Broodwar->self()->getStartLocation());
                     if(built){
                         next[i].countBuiltNow++; //tell queue we did it
                         track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
@@ -253,8 +253,8 @@ BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
 
 
-// Attempt tp construct a building of a given type 
-bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder){
+// Attempt to construct a building of a given type IN A GIVEN BASE
+bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos){
 
     // Get the type of unit that is required to build the desired building
     BWAPI::UnitType builderType = type.whatBuilds().first;
@@ -263,8 +263,7 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder){
     BWAPI::Unit builder = Tools::GetBuilder(builderType);
     if (!builder) { return false; }
 
-    // Get a location that we want to build the building next to
-    BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
+    // Desired location is argument now
 
     // Ask BWAPI for a building location near the desired position for the type
     int maxBuildRange = 64;

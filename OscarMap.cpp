@@ -81,4 +81,21 @@ void OscarMap::findBases(){
         }
     }
 
+    //assign our natural
+    size_t min = INT16_MAX;
+    const BWEM::Base * baseBest = nullptr;
+
+    for (auto &base : natBases){
+
+        const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(main->Center(), base->Center() );
+        const auto dist = Path.size();
+        if(dist < min){
+            min = dist;
+            baseBest = base;
+        } 
+
+    }
+
+    natural = baseBest;
+
 }

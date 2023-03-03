@@ -88,7 +88,7 @@ private:
     Tracker track;
     InitialBuildOrder ibo = InitialBuildOrder();
     
-    bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit* builder);
+    bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos);
     BuildResult TrainUnit(BWAPI::UnitType type);
 	void clearEmptyEntries();
 
