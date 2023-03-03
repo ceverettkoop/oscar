@@ -4,9 +4,16 @@
 
 class OscarMap;
 
+typedef struct baseEcon{
+    int onGas;
+    int onMin;
+
+};
+
 class GameState{
     
 public:
     bool isScouting = false;
     OscarMap* mapPtr;
+    
 };
