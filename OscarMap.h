@@ -6,9 +6,8 @@
 class OscarMap{
 
 public:
-    const BWEM::Base* main = nullptr;
-    const BWEM::Base* natural = nullptr;
-    const BWEM::Base* nextExp = nullptr;
+    const BWEM::Base* myMain = nullptr;
+    const BWEM::Base* myNatural = nullptr;
 
     const BWEM::Base* enemyMain = nullptr;
     const BWEM::Base* enemyNatural = nullptr;

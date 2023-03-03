@@ -81,13 +81,22 @@ void OscarMap::findBases(){
         }
     }
 
+    
+    //assign our main
+    for(auto &base : mainBases){
+        if(BWAPI::TilePosition(base->Center()) ==  BWAPI::Broodwar->self()->getStartLocation()){
+            myMain = base;
+        }
+    }
+    
+    
     //assign our natural
     size_t min = INT16_MAX;
     const BWEM::Base * baseBest = nullptr;
 
     for (auto &base : natBases){
 
-        const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(main->Center(), base->Center() );
+        const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(myMain->Center(), base->Center() );
         const auto dist = Path.size();
         if(dist < min){
             min = dist;
@@ -96,6 +105,6 @@ void OscarMap::findBases(){
 
     }
 
-    natural = baseBest;
+    myNatural = baseBest;
 
 }

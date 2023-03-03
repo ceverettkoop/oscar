@@ -29,8 +29,14 @@ void Oscar::onStart()
 
     //start internal map manager
     map.onStart();
+
     //allow global gamestate variable to access our map info
     gs.mapPtr = &map;
+
+    //assign game state to decider
+    decider.gs = &gs;
+
+    decider.onStart();
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
@@ -55,8 +61,8 @@ void Oscar::onFrame()
     //Update Oscars map tools
     map.onFrame();
 
-    //Make decisions; pass it the gamestate
-    decider.onFrame(&gs);
+    //Make decisions; interacts with gamestate
+    decider.onFrame();
 
     // Send our idle workers to mine minerals so they don't just stand there
     sendIdleWorkersToMinerals();
@@ -79,8 +85,7 @@ void Oscar::onFrame()
 }
 
 // Send our idle workers to mine minerals so they don't just stand there
-void Oscar::sendIdleWorkersToMinerals()
-{
+void Oscar::sendIdleWorkersToMinerals(){
 
     // Let's send all of our starting workers to the closest mineral to them
     // First we need to loop over all of the units that we (BWAPI::Broodwar->self()) own

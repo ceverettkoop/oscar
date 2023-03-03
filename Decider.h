@@ -8,10 +8,15 @@ class Decider{
 public:  
     Decider(){};
     
-    void onStart(GameState* gs);
-    void onFrame(GameState* gs);
+    GameState* gs;
+    void onStart();
+    void onFrame();
+    void onUnitDestroy(BWAPI::Unit unit);
+    void onUnitComplete(BWAPI::Unit unit);
 
 private:
-    void setScouting(GameState* gs);
+    void setScouting();
+    void calculateWorkers();
+    void updateOwnedBases();
 
 };
