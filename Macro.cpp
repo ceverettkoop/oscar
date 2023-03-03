@@ -25,24 +25,26 @@ void MacroManager::scouting(GameState* gs){
     auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
     for(BWAPI::TilePosition tpos : startLocations){
-        if(BWAPI::Broodwar->isExplored(tpos)) continue; //if we have seen the base skip
 
-        BWAPI::Position pos(tpos);
-        scout->move(pos); //otherwise move to it
-
-        if(BWAPI::Broodwar->isExplored(tpos)){ //if we are seeing it for the first time check if enemy is there
+        if(BWAPI::Broodwar->isExplored(tpos)){ //if we see an enemy unit on the start position mark the base
             BWAPI::Unitset baseUnits = BWAPI::Broodwar->getUnitsOnTile(tpos);
             for(auto& unit : baseUnits){
-                if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) enemyLocation = tpos;
+                if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())){
+                     enemyLocation = tpos;
+                }
                 
                 for(auto& base : gs->mapPtr->mainBases){
                     if(base->Location() == tpos){
                         gs->mapPtr->enemyMain = base;
+                        gs->isScouting = false;    //end scouting now
                     }
                 }
-                
             }    
+            continue; //not directing movement to explored start locations
         }
+
+        BWAPI::Position pos(tpos);
+        scout->move(pos); //otherwise move to it
         
         break;
     }
