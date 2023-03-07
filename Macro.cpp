@@ -66,35 +66,125 @@ void MacroManager::assignWorkers(){
     //logic for worker to flee enemy or fight etc handled in micro which procs after macro and should overwrite this command
     //scouting etc also procs after
 
-    BWAPI::Unitset allWorkers = Tools::GetUnitSetofType(BWAPI::Broodwar->self()->getRace().getWorker());
-    BWAPI::Unit worker;
-    auto itr = allWorkers.begin();
+    BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
 
-    //go through bases and assign workers based on what base needs
-    for(auto &p : gs->workerTotals){
-        
-        //otherwise chose a worker
-        worker = *itr;
-        //skip workers that are not idle and are not mining already; assume if they are doing something else it's important
-        while(!worker->isIdle() && !worker->isGatheringMinerals() && !worker->isGatheringGas()  ){
-            if (itr != allWorkers.end()){
-                 itr++;
-                 worker = *itr;
-            }else{
-                return; //bail if at end of worker set
-            }
+    BWAPI::Unitset idleWorkers;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        if (unit->getType() == type && unit->isCompleted() && unit->isIdle()){
+            idleWorkers.insert(unit);
         }
-        
-        //now we have a worker idle or already mining... hopefully
-        if(p.first.isOccupied){
-            //for each mineral patch assign a worker
-            for(auto min : p.second->Minerals()){
-                
-            }
-        }
+    }
 
+    //in theory a set of workers we can steal from because they are assigned to mining but not moving there
+    BWAPI::Unitset gatherers;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        if (unit->getType() == type && unit->isCompleted() && BWAPI::Orders::WaitForMinerals){
+            gatherers.insert(unit);
+        }
     }
 
 
+    BWAPI::Unit worker;
+
+    //FOR EACH BASE
+    for(auto &p : gs->workerTotals){
+        if(p.first.isOccupied){
+
+            //count workers in base that are gathering minerals and gas
+            int minerCount = countMinersInBase(p.second);
+            int collectorCount = countGasCollectorsInBase(p.second);
+
+            //GAS 
+            //DBL GEYSER WILL BE BROKEN TODO FIX    
+            auto geyser = p.second->Geysers().front();
+
+            //while we have less collectors than needed
+            while(collectorCount < p.first.onGas){
+                
+                //try to assign an idle worker first then a waiting min gatherer
+                if(idleWorkers.size() > 0){
+                    worker =  *idleWorkers.begin();
+                    Tools::SmartRightClick(worker, geyser->Unit());
+                    collectorCount++;
+                    idleWorkers.erase(idleWorkers.begin());
+                }else if(gatherers.size() > 0){
+                        worker =  *gatherers.begin();
+                        Tools::SmartRightClick(worker, geyser->Unit());
+                        collectorCount++;
+                        gatherers.erase(gatherers.begin());
+                    }else break; //if both sets empty give up
+            }
+
+            //MINERALS
+            //while we have less collectors than needed
+            while(minerCount < p.first.onMin){
+                //try to assign an idle worker then a gatherer
+                if(idleWorkers.size() > 0){
+                    worker =  *idleWorkers.begin();
+
+                    //find best mineral, this will be a function later
+                    BWAPI::Unit targetMin;
+                    for(auto min : p.second->Minerals()){
+                        targetMin = min->Unit();
+                        if(!min->Unit()->isBeingGathered()) break;
+                    }
+
+                    Tools::SmartRightClick(worker, targetMin);
+                    minerCount++;
+                    idleWorkers.erase(idleWorkers.begin());
+                }else if(gatherers.size() > 0){
+                        worker =  *gatherers.begin();
+
+                        //find best mineral, this will be a function later
+                        BWAPI::Unit targetMin;
+                        for(auto min : p.second->Minerals()){
+                            targetMin = min->Unit();
+                            if(!min->Unit()->isBeingGathered()) break;
+                        }
+
+                        Tools::SmartRightClick(worker, targetMin);
+                        minerCount++;
+                        gatherers.erase(gatherers.begin());
+                    }else break; //if both sets empty give up
+            }
+
+        }
+    }
+}
+
+
+//for speed just counting a miner that is within 20 build tiles of center of base (not ideal)
+int MacroManager::countMinersInBase(const BWEM::Base *base){
+
+    int count = 0;
+
+    BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        if(unit->getType() = type && unit->isGatheringMinerals()){
+            if( unit->getDistance(base->Center()) < 640 ){
+                count++;
+            }
+        }
+    }
+
+    return count;
+
+}
+
+//for speed just counting a miner that is within 20 build tiles of center of base (not ideal)
+int MacroManager::countGasCollectorsInBase(const BWEM::Base *base){
+
+    int count = 0;
+
+    BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+        if(unit->getType() = type && unit->isGatheringGas()){
+            if( unit->getDistance(base->Center()) < 640 ){
+                count++;
+            }
+        }
+    }
+
+    return count;
 
 }

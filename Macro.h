@@ -10,6 +10,8 @@ private:
 
     void scouting();
     void assignWorkers();
+    int countMinersInBase(const BWEM::Base *base);
+    int countGasCollectorsInBase(const BWEM::Base *base);
 
 public:
     void onStart();
