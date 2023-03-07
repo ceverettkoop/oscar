@@ -90,7 +90,7 @@ void BuildQueue::updateQueue(){
         //are we supply blocked add 1 pylon to queue
         int totalSupply = Tools::GetTotalSupply(true); //incl under construction
         if( (supplyUsed + 4) >= totalSupply){
-            addEntryNow(1, pylon);
+            replaceEntryNow(1, pylon);
         }
         
         //assimilator test
@@ -112,17 +112,17 @@ void BuildQueue::updateQueue(){
 
 
 
-
+//THIS RESETS NOW QUEUE
 void BuildQueue::addEntryNow(int count, BWAPI::UnitType type){
 
     bool typeExists = false;
     
-    //if type already in queue reset count wanted and built
+    //if type already in queue add to it
     for (int i = 0; i < next.size() && !typeExists; ++i){
         if (type == next[i].type){
             typeExists = true; 
-            next[i].countWantedNow = count;
-            next[i].countBuiltNow = 0;            
+            next[i].countWantedNow += count;
+            //next[i].countBuiltNow = 0;            
         }     
     }
 
@@ -191,6 +191,29 @@ int BuildQueue::updateQty(int index){
     return 0;
 }
 
+void BuildQueue::replaceEntryNow(int count, BWAPI::UnitType type){
+
+    bool typeExists = false;
+    
+    //if type already in queue add to it
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].type){
+            typeExists = true; 
+            next[i].countWantedNow = count;
+            next[i].countBuiltNow = 0;            
+        }     
+    }
+
+    //else create it
+    if (!typeExists){
+        next.push_back(QueueEntry());
+        next.back().type = type;
+        next.back().countWantedNow = count;
+        next.back().countBuiltNow = 0;
+    }
+
+}
+
 void BuildQueue::rmEntry(BWAPI::UnitType type){
 
     //not sure why you would need to but this will kill off a bq entry
@@ -236,11 +259,26 @@ BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
         //check if on the way to build and if so move on
         for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
-            if (unit->getBuildType() == reqType) aboutToBuild = true;
+            if (unit->getBuildType() == reqType){
+                aboutToBuild = true;
+                break;
+            } 
         }
         if (aboutToBuild) continue;
 
-        //add one to queue if not built yet and not on the way to build
+        //check if already added to queue and if so move on
+        bool added = false;
+        for (auto& entry : next){
+            if(entry.type == reqType){
+                added = true;
+                break;
+            }
+        }
+        if (added) continue;
+
+        
+
+        //add one to queue if not built yet and not on the way to build 
         if(!Tools::CountUnitsOfType(reqType, BWAPI::Broodwar->self()->getUnits())){
             addEntryNow(1, reqType);
             return reqType; //only building the first one
@@ -313,7 +351,7 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 
     int supplyCount = dblSupplyCount; //ibo was doubled already whoops
         
-    //assume constant droning unless we exceed count per gs
+    //assume constant droning unless we exceed count per gs.. should not happen on ibo
     bool droning = (bq->gs->workerCount < bq->gs->workerMax);
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
     BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
@@ -323,8 +361,16 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
         if( BWAPI::Broodwar->self()->minerals() < 150)  droning = false;
     }*/
 
+    //always have queued one drone
     if(droning){ 
-        bq->addEntryNow(1, worker);
+        bool droneQueued = false;
+        for (auto& entry : bq->next){
+            if(entry.type == worker){
+                droneQueued = true;
+                break;
+            }
+        }
+        if(!droneQueued) bq->addEntryNow(1, worker);
     }
 
     //also build prescribed building or unit but only one per step   

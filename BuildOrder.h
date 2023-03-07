@@ -111,6 +111,7 @@ public:
     void updateQueue();
 	int updateQty(int index);
 	void addEntryNow(int count, BWAPI::UnitType type);
+	void replaceEntryNow(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UnitType type);
 	void rmEntry(BWAPI::UnitType type);
 	void entryToFront(BWAPI::UnitType type); 
