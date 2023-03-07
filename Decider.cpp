@@ -13,7 +13,8 @@ void Decider::onStart(){
                 bool isStart = (gs->mapPtr->myMain->Center() == base.Center() );
                 baseEconomy newEntry;
                 newEntry.isOccupied = isStart;
-                gs->workerTotals.insert({newEntry, &base});
+                std::pair<baseEconomy, const BWEM::Base *> pr(newEntry, &base);
+                gs->workerTotals.push_back(pr);
         }
     }
 
@@ -103,7 +104,7 @@ void Decider::calculateWorkers(){
 
     //assign min workers to each base based on priority
     for (size_t i = 0; i < gs->activeBaseCount; i++){
-        for(std::pair<baseEconomy, const BWEM::Base *>p : gs->workerTotals){
+        for(auto p : gs->workerTotals){
             if(!p.first.isOccupied) continue;
             if(p.first.basePriority == i){
                 p.first.onMin = p.first.minCount;
@@ -119,7 +120,7 @@ void Decider::calculateWorkers(){
     //assign additional workers until out
     while(assignedWorkers >= gs->workerCount){
         for (size_t i = 0; i < gs->activeBaseCount; i++){
-            for(std::pair<baseEconomy, const BWEM::Base *>p : gs->workerTotals){
+            for(auto p : gs->workerTotals){
                 if(!p.first.isOccupied) continue;
                 if(p.first.basePriority == i){
                     p.first.onMin++;

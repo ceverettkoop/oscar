@@ -1,11 +1,12 @@
 #pragma once
 #include <BWAPI.h>
 #include "BWEM/bwem.h"
-#include <map>
+#include <vector>
 
 class OscarMap;
 
-typedef struct baseEconomy{
+struct baseEconomy{
+
     int onGas = 0;
     int onMin = 0;
     int minCount = 0;
@@ -23,6 +24,6 @@ public:
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand
     int activeBaseCount = 1;
     OscarMap* mapPtr = nullptr;
-    std::map<baseEconomy, const BWEM::Base*> workerTotals;
+    std::vector<std::pair<baseEconomy, const BWEM::Base *>> workerTotals;
     
 };
