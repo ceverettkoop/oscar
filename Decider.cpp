@@ -84,6 +84,7 @@ void Decider::calculateWorkers(){
         if(p.first.isOccupied){
             p.first.minCount = p.second->Minerals().size(); //shooting for two workers per min patch
             workerMax += (p.first.minCount * 2);
+
             size_t assimilatorCount = 0;
             //check if assimilator is done on geysers in base
             for(auto geyser : p.second->Geysers()){
@@ -98,17 +99,28 @@ void Decider::calculateWorkers(){
             p.first.assimilatorCount = assimilatorCount;
         }
     }
-    //based on above store worker max
-    gs->workerMax = workerMax;
+    //based on above store worker max; we should stop droning at this point
+    //adding 2 for builders etc
+    gs->workerMax = workerMax + 2;
 
+
+    //now assigning workers to each base based on priority
     int assignedWorkers = 0;
 
-    //assign min workers to each base based on priority
     for (size_t i = 0; i < gs->activeBaseCount; i++){
         for(auto &p : gs->workerTotals){
-            if(!p.first.isOccupied) continue;
+            if(!p.first.isOccupied) continue; //skip if not occupied
+            
+            //special case if we have more minerals at any base than we have workers total, skip all the logic below
+            if(p.first.minCount > gs->workerCount){
+                p.first.onMin = gs->workerCount;
+                assignedWorkers = gs->workerCount;
+                break;
+            } 
+
+            //else set minimums, one per patch and 3 per gas
             if(p.first.basePriority == i){
-                p.first.onMin = p.first.minCount;
+                p.first.onMin = p.first.minCount; //setting a minimum of one miner per min patch
                 assignedWorkers += p.first.onMin;
                 if (assignedWorkers >= gs->workerCount) break;
                 p.first.onGas = p.first.assimilatorCount * 3;
@@ -118,12 +130,14 @@ void Decider::calculateWorkers(){
         }
     }
     
-    //assign additional workers until out
+    //now if we have more workers than already assigned; after assigning minimum
+    //assign additional workers until all are done
     //one at a time per base then loop back
-    while(assignedWorkers <= gs->workerCount){
+    while(assignedWorkers < gs->workerCount){
         for (size_t i = 0; i < gs->activeBaseCount; i++){
             for(auto &p : gs->workerTotals){ //each base
-                if(!p.first.isOccupied) continue;
+                if(!p.first.isOccupied) continue; //skip empty bases
+
                 if(p.first.basePriority == i){
                     p.first.onMin++;
                     assignedWorkers++;
@@ -133,7 +147,6 @@ void Decider::calculateWorkers(){
                         p.first.onGas++;
                         assignedWorkers++;                               
                     }
-                    break;
                 }
             }
         }
