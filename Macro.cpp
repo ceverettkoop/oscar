@@ -119,9 +119,6 @@ void MacroManager::assignWorkers(){
             //while we have less collectors than needed
             while(minerCount < p.first.onMin){
 
-                //if this is early game our demand for miners will outpace all workers, so just move on
-
-
                 //first try to assign an idle worker
                 if(idleWorkers.size() > 0){
                     worker =  *idleWorkers.begin();
