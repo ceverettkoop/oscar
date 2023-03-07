@@ -5,6 +5,8 @@
 #include "BWEM/bwem.h"
 #include <vector>
 
+class GameState;
+
 class OscarMap{
 
 public:
@@ -22,9 +24,11 @@ public:
 
     void onStart();
     void onFrame();
+    const BWEM::Base * findNextExpansion(GameState *gs);
 
 
 private:    
     void findBases();
+    void OscarMap::assignNatural();
 
 };

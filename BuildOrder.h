@@ -94,6 +94,14 @@ private:
     bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos);
     BuildResult TrainUnit(BWAPI::UnitType type);
 	void clearEmptyEntries();
+	BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type);
+	void updateQueue();
+
+	int updateQty(int index);
+	void rmEntry(BWAPI::UnitType type);
+	void entryToFront(BWAPI::UnitType type);
+
+	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
 
 public:
 
@@ -108,16 +116,14 @@ public:
 	
 	void onStart(char* iboPath);
     void onFrame();
-    void updateQueue();
-	int updateQty(int index);
+
 	void addEntryNow(int count, BWAPI::UnitType type);
 	void replaceEntryNow(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UnitType type);
-	void rmEntry(BWAPI::UnitType type);
-	void entryToFront(BWAPI::UnitType type); 
+
 	//todo more clever prioritization functions
 	//note bool BWAPI::PlayerInterface::isUnitAvailable (UnitType unit) const will tell if can build
-	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
+	
 
 
 };

@@ -1,6 +1,7 @@
 //Really manages everything to do with building buildings or training units
 
 #include "BuildOrder.h"
+#include "OscarMap.h"
 #include <fstream>
 #include "Tools.h"
 
@@ -36,7 +37,7 @@ void BuildQueue::onFrame(){
                 bool built = false;
                 for (int n = 0; n < countToBuild; ++n){
                     BWAPI::Unit foundBuilder;
-                    built = BuildBuilding(nextUnit, &foundBuilder, BWAPI::Broodwar->self()->getStartLocation());
+                    built = BuildBuilding(nextUnit, &foundBuilder, determineLocation(nextUnit));
                     if(built){
                         next[i].countBuiltNow++; //tell queue we did it
                         track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
@@ -92,15 +93,18 @@ void BuildQueue::updateQueue(){
         if( (supplyUsed + 4) >= totalSupply){
             replaceEntryNow(1, pylon);
         }
-        
-        //assimilator test
-            addEntryTotal(1, BWAPI::UnitTypes::Protoss_Assimilator);
-
-        //try to build one dragoon to see how much it fucks up
-            addEntryTotal(4, BWAPI::UnitTypes::Protoss_Dragoon);
 
         //DRONE QUEUE set to workermax
             addEntryTotal(gs->workerMax, worker);
+
+        //build assimilator once off ibo
+            addEntryTotal(1, BWAPI::BroodwarPtr->self()->getRace().getRefinery());
+
+        //Try to expand if told to
+            if(gs->basesDesired > gs->activeBaseCount){
+                addEntryTotal(gs->basesDesired , BWAPI::BroodwarPtr->self()->getRace().getResourceDepot());
+                //reset flag now that it's been queued
+            }
 
         //ZEALOT QUEUE
             addEntryTotal(10, BWAPI::UnitTypes::Protoss_Zealot);
@@ -239,6 +243,15 @@ void BuildQueue::entryToFront(BWAPI::UnitType type){
     }
 
     if(typeExists) std::rotate(next.begin(), (next.begin() + index), next.end());
+
+}
+
+BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type){
+
+    if(type == BWAPI::BroodwarPtr->self()->getRace().getResourceDepot()){
+        return gs->mapPtr->findNextExpansion(gs)->Location();
+
+    }else BWAPI::Broodwar->self()->getStartLocation();
 
 }
 

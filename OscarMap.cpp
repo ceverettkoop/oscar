@@ -3,6 +3,7 @@
 #include "OscarMap.h"
 #include <vector>
 #include <cfloat>
+#include "GameState.h"
 
 
 void OscarMap::onStart(){
@@ -80,5 +81,41 @@ void OscarMap::findBases(){
                 natBases.push_back(baseBest);
         }
     }
+
+}
+
+const BWEM::Base * OscarMap::findNextExpansion(GameState *gs){
+
+    //assign our natural if we haven't already
+    if(myNatural = nullptr){
+        assignNatural();
+    }
+    
+    //assume if we have less than two bases occupied we want to take the natural
+    if(gs->activeBaseCount < 2){
+        return myNatural;
+    }
+    
+    //TODO add third base logic :)
+    
+
+}
+
+void OscarMap::assignNatural(){
+
+    size_t min = INT16_MAX;
+    const BWEM::Base * baseBest = nullptr;
+
+    for (auto &base : natBases){
+
+        const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(myMain->Center(), base->Center() );
+        const auto dist = Path.size();
+        if(dist < min){
+            min = dist;
+            baseBest = base;
+        } 
+    }
+
+    myNatural = baseBest;
 
 }

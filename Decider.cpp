@@ -27,6 +27,12 @@ void Decider::onFrame(){
     //decide if we are scouting
     setScouting();
 
+    //placeholder expansion logic
+    //if over 20 workers and nexus not already in the queue flip it on
+    if(gs->workerCount > 16){
+        gs->basesDesired = 2;
+    }
+
 }
 
 void Decider::onUnitComplete(BWAPI::Unit unit){
@@ -167,12 +173,9 @@ void Decider::updateOwnedBases(){
         for(auto unit : BWAPI::Broodwar->getUnitsOnTile(pair.second->Location()) ){ //check each base for completed CC
             if( unit->getType().isResourceDepot() && unit->isCompleted() && (unit->getPlayer() == BWAPI::Broodwar->self()) ){   
     
-                //if we have never determined our main base or natural
+                //if we have never determined our main base this will be set on first run
                 if(gs->mapPtr->myMain == nullptr){
                     gs->mapPtr->myMain = pair.second;
-                }
-                if(gs->mapPtr->myNatural == nullptr && pair.second != gs->mapPtr->myMain){
-                    gs->mapPtr->myNatural = pair.second;
                 }
 
                 pair.first.isOccupied = true;
