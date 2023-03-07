@@ -66,17 +66,11 @@ void Oscar::onFrame()
     //Make decisions; interacts with gamestate
     decider.onFrame();
 
-    // Send our idle workers to mine minerals so they don't just stand there
-    //sendIdleWorkersToMinerals();
-
-    //divert workers to gas if we have less than X
-    //and if we have an assimilator
-    //collectGas(3);
-
-    //Macro level troop movements; pass it the gamestate
+    //Macro level movements
+    //this includes assigning workers to mine or gather gas
     macro.onFrame();
 
-    //Assign builders to build
+    //Assign builders to build/
     bq.onFrame();
 
     // Draw unit health bars, which brood war unfortunately does not do

@@ -78,7 +78,7 @@ void MacroManager::assignWorkers(){
     //in theory a set of workers we can steal from because they are assigned to mining but not moving there
     BWAPI::Unitset gatherers;
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
-        if (unit->getType() == type && unit->isCompleted() && BWAPI::Orders::WaitForMinerals){
+        if (unit->getType() == type && unit->isCompleted() && unit->getOrder() == BWAPI::Orders::WaitForMinerals){
             gatherers.insert(unit);
         }
     }
@@ -118,7 +118,11 @@ void MacroManager::assignWorkers(){
             //MINERALS
             //while we have less collectors than needed
             while(minerCount < p.first.onMin){
-                //try to assign an idle worker then a gatherer
+
+                //if this is early game our demand for miners will outpace all workers, so just move on
+
+
+                //first try to assign an idle worker
                 if(idleWorkers.size() > 0){
                     worker =  *idleWorkers.begin();
 
@@ -132,7 +136,7 @@ void MacroManager::assignWorkers(){
                     Tools::SmartRightClick(worker, targetMin);
                     minerCount++;
                     idleWorkers.erase(idleWorkers.begin());
-                }else if(gatherers.size() > 0){
+                }else if(gatherers.size() > 0){ //if no idle workers steal a gatherer
                         worker =  *gatherers.begin();
 
                         //find best mineral, this will be a function later
