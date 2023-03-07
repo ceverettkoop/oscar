@@ -67,11 +67,11 @@ void Oscar::onFrame()
     decider.onFrame();
 
     // Send our idle workers to mine minerals so they don't just stand there
-    sendIdleWorkersToMinerals();
+    //sendIdleWorkersToMinerals();
 
     //divert workers to gas if we have less than X
     //and if we have an assimilator
-    collectGas(3);
+    //collectGas(3);
 
     //Macro level troop movements; pass it the gamestate
     macro.onFrame();
@@ -161,8 +161,9 @@ void Oscar::onEnd(bool isWinner)
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
-void Oscar::onUnitDestroy(BWAPI::Unit unit)
-{
+void Oscar::onUnitDestroy(BWAPI::Unit unit){
+
+    decider.onUnitDestroy(unit);
 	
 }
 
@@ -193,6 +194,7 @@ void Oscar::onUnitCreate(BWAPI::Unit unit)
 // Called whenever a unit finished construction, with a pointer to the unit
 void Oscar::onUnitComplete(BWAPI::Unit unit)
 {
+    decider.onUnitComplete(unit);
 	
 }
 

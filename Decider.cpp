@@ -10,13 +10,14 @@ void Decider::onStart(){
     for (auto &area : BWEM::Map::Instance().Areas()) {
         
         for (auto &base : area.Bases()) {
-                bool isStart = (gs->mapPtr->myMain->Center() == base.Center() );
                 baseEconomy newEntry;
-                newEntry.isOccupied = isStart;
                 std::pair<baseEconomy, const BWEM::Base *> pr(newEntry, &base);
                 gs->workerTotals.push_back(pr);
         }
     }
+
+    updateOwnedBases();
+    calculateWorkers();
 
 }
 
@@ -79,7 +80,7 @@ void Decider::calculateWorkers(){
     //update mineral count and assimilator count per base
     //based on this infer max efficient worker count
     int workerMax = 0;
-    for(std::pair<baseEconomy, const BWEM::Base *>p : gs->workerTotals){
+    for(auto &p : gs->workerTotals){
         if(p.first.isOccupied){
             p.first.minCount = p.second->Minerals().size(); //shooting for two workers per min patch
             workerMax += (p.first.minCount * 2);
@@ -104,7 +105,7 @@ void Decider::calculateWorkers(){
 
     //assign min workers to each base based on priority
     for (size_t i = 0; i < gs->activeBaseCount; i++){
-        for(auto p : gs->workerTotals){
+        for(auto &p : gs->workerTotals){
             if(!p.first.isOccupied) continue;
             if(p.first.basePriority == i){
                 p.first.onMin = p.first.minCount;
@@ -120,7 +121,7 @@ void Decider::calculateWorkers(){
     //assign additional workers until out
     while(assignedWorkers >= gs->workerCount){
         for (size_t i = 0; i < gs->activeBaseCount; i++){
-            for(auto p : gs->workerTotals){
+            for(auto &p : gs->workerTotals){
                 if(!p.first.isOccupied) continue;
                 if(p.first.basePriority == i){
                     p.first.onMin++;
@@ -142,18 +143,27 @@ void Decider::calculateWorkers(){
 void Decider::updateOwnedBases(){
     gs->activeBaseCount = 0; //reset count of occupied bases to zero temporarily before we count them
 
-    for(std::pair<baseEconomy, const BWEM::Base *> pair : gs->workerTotals){
+    for(auto &pair : gs->workerTotals){
         
         for(auto unit : BWAPI::Broodwar->getUnitsOnTile(pair.second->Location()) ){ //check each base for completed CC
-            pair.first.isOccupied = false;
             if( unit->getType().isResourceDepot() && unit->isCompleted() && (unit->getPlayer() == BWAPI::Broodwar->self()) ){   
+    
+                //if we have never determined our main base or natural
+                if(gs->mapPtr->myMain == nullptr){
+                    gs->mapPtr->myMain = pair.second;
+                }
+                if(gs->mapPtr->myNatural == nullptr && pair.second != gs->mapPtr->myMain){
+                    gs->mapPtr->myNatural = pair.second;
+                }
+
                 pair.first.isOccupied = true;
                 gs->activeBaseCount++;
                 if(pair.second == gs->mapPtr->myMain){ pair.first.basePriority = 0;}
                     else if(pair.second == gs->mapPtr->myNatural){ pair.first.basePriority = 1;}
                         else (pair.first.basePriority = 2);
                 break; //skip to next base if we confirm CC
-            }
+            }else pair.first.isOccupied = false;
         }
     }
+
 }

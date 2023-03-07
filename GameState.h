@@ -22,7 +22,7 @@ public:
     bool isScouting = false;
     int workerCount = 0;
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand
-    int activeBaseCount = 1;
+    int activeBaseCount = 0;
     OscarMap* mapPtr = nullptr;
     std::vector<std::pair<baseEconomy, const BWEM::Base *>> workerTotals;
     
