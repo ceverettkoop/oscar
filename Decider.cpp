@@ -119,9 +119,10 @@ void Decider::calculateWorkers(){
     }
     
     //assign additional workers until out
-    while(assignedWorkers >= gs->workerCount){
+    //one at a time per base then loop back
+    while(assignedWorkers <= gs->workerCount){
         for (size_t i = 0; i < gs->activeBaseCount; i++){
-            for(auto &p : gs->workerTotals){
+            for(auto &p : gs->workerTotals){ //each base
                 if(!p.first.isOccupied) continue;
                 if(p.first.basePriority == i){
                     p.first.onMin++;
