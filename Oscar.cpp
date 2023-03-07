@@ -73,11 +73,11 @@ void Oscar::onFrame()
     //and if we have an assimilator
     collectGas(3);
 
-    //All building of units or buildings
-    bq.onFrame();
-
     //Macro level troop movements; pass it the gamestate
     macro.onFrame();
+
+    //Assign builders to build
+    bq.onFrame();
 
     // Draw unit health bars, which brood war unfortunately does not do
     //Tools::DrawUnitHealthBars();
