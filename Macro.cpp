@@ -26,7 +26,15 @@ void MacroManager::scouting(){
     
     //assign scout if needed
     if(scout == nullptr || !scout->exists()){ //if scout not assigned or dead
-            scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
+           
+        //find any worker except don't steal a builder! this will break our build logic
+        for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+            //if worker and complete and was not just told to build
+            if (unit->getType() == BWAPI::Broodwar->self()->getRace().getWorker() && unit->isCompleted()
+                && unit->getLastCommand().getType() != BWAPI::UnitCommandTypes::Build ){
+                scout = unit;
+            }
+        }
     }
 
     auto& startLocations = BWAPI::Broodwar->getStartLocations();
@@ -68,6 +76,7 @@ void MacroManager::assignWorkers(){
 
     BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
 
+    //global to all bases
     BWAPI::Unitset idleWorkers;
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
         if (unit->getType() == type && unit->isCompleted() && unit->isIdle()){
@@ -75,20 +84,43 @@ void MacroManager::assignWorkers(){
         }
     }
 
-    //in theory a set of workers we can steal from because they are assigned to mining but not moving there
-    BWAPI::Unitset gatherers;
-    for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
-        if (unit->getType() == type && unit->isCompleted() && unit->getOrder() == BWAPI::Orders::WaitForMinerals){
-            gatherers.insert(unit);
-        }
-    }
-
-
     BWAPI::Unit worker;
 
     //FOR EACH BASE
     for(auto &p : gs->workerTotals){
+        
+        //reset eligible gatherers to steal
+        BWAPI::Unitset localMiners;
+        localMiners.clear();
+
+        BWAPI::Unitset otherMiners;
+        otherMiners.clear();
+
         if(p.first.isOccupied){
+
+            //create set of localMiners for this base
+            for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+                BWAPI::Unit target = unit->getOrderTarget();
+                if (unit->getType() == type && unit->isCompleted() && unit->isGatheringMinerals()){ 
+                    if (target != nullptr){
+                        if((unit->getOrderTarget()->getDistance(p.second->Center()) < 640 )){
+                            localMiners.insert(unit);
+                        }
+                    }
+                }
+            }
+
+            //create set of otherMiners
+            for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
+                BWAPI::Unit target = unit->getOrderTarget();
+                if (unit->getType() == type && unit->isCompleted() && unit->isGatheringMinerals()){ 
+                    if (target != nullptr){
+                        if((unit->getOrderTarget()->getDistance(p.second->Center()) > 640 )){
+                            otherMiners.insert(unit);
+                        }
+                    }
+                }
+            }
 
             //count workers in base that are gathering minerals and gas
             int minerCount = countMinersInBase(p.second);
@@ -98,26 +130,26 @@ void MacroManager::assignWorkers(){
             //DBL GEYSER WILL BE BROKEN TODO FIX    
             auto geyser = p.second->Geysers().front();
 
-            //while we have less collectors than needed
+            //while we have less gas collectors than needed
             while(collectorCount < p.first.onGas){
                 
-                //try to assign an idle worker first then a waiting min gatherer
+                //try to assign an idle worker first then steal a local miner
                 if(idleWorkers.size() > 0){
                     worker =  *idleWorkers.begin();
                     Tools::SmartRightClick(worker, geyser->Unit());
                     collectorCount++;
                     idleWorkers.erase(idleWorkers.begin());
-                }else if(gatherers.size() > 0){
-                        worker =  *gatherers.begin();
+                }else if(localMiners.size() > 0){
+                        worker =  *localMiners.begin();
                         Tools::SmartRightClick(worker, geyser->Unit());
                         collectorCount++;
-                        gatherers.erase(gatherers.begin());
+                        localMiners.erase(localMiners.begin());
                     }else break; //if both sets empty give up
             }
 
             //MINERALS
-            //while we have less collectors than needed
-            while(minerCount < p.first.onMin){
+            //while we have less min collectors than needed
+            while(minerCount < p.first.onMin ){
 
                 //first try to assign an idle worker
                 if(idleWorkers.size() > 0){
@@ -133,8 +165,10 @@ void MacroManager::assignWorkers(){
                     Tools::SmartRightClick(worker, targetMin);
                     minerCount++;
                     idleWorkers.erase(idleWorkers.begin());
-                }else if(gatherers.size() > 0){ //if no idle workers steal a gatherer
-                        worker =  *gatherers.begin();
+                
+                //if idle does not bring us up to count steal one from elsewhere
+                }else if(otherMiners.size() > 0){
+                        worker =  *otherMiners.begin();
 
                         //find best mineral, this will be a function later
                         BWAPI::Unit targetMin;
@@ -145,11 +179,36 @@ void MacroManager::assignWorkers(){
 
                         Tools::SmartRightClick(worker, targetMin);
                         minerCount++;
-                        gatherers.erase(gatherers.begin());
+                        otherMiners.erase(otherMiners.begin());
                     }else break; //if both sets empty give up
             }
-
         }
+    }
+
+    //if after all that we still have idle workers send them to mine at first base listed as occupied
+    while(idleWorkers.size() > 0){
+        
+        const BWEM::Base *base = nullptr;
+
+        worker =  *idleWorkers.begin();
+        for(auto &p : gs->workerTotals){
+            if (p.first.isOccupied){
+                base = p.second;
+                break;
+            }
+        }
+
+        if(base == nullptr) break;
+
+        //find best mineral, this will be a function later
+        BWAPI::Unit targetMin;
+        for(auto min : base->Minerals()){
+            targetMin = min->Unit();
+            if(!min->Unit()->isBeingGathered()) break;
+        }
+
+        Tools::SmartRightClick(worker, targetMin);
+        idleWorkers.erase(idleWorkers.begin());
     }
 }
 

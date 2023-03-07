@@ -9,6 +9,8 @@
 #include "OscarMap.h"
 #include "BuildOrder.h"
 #include "Macro.h"
+#pragma once
+
 #include "MapTools.h"
 #include <BWAPI.h>
 #include <vector>

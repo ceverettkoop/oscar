@@ -1,4 +1,4 @@
-//Really manages everything to do with building buildings or trainingu nits
+//Really manages everything to do with building buildings or training units
 
 #include "BuildOrder.h"
 #include <fstream>
@@ -99,8 +99,8 @@ void BuildQueue::updateQueue(){
         //try to build one dragoon to see how much it fucks up
             addEntryTotal(4, BWAPI::UnitTypes::Protoss_Dragoon);
 
-        //DRONE QUEUE
-            addEntryTotal(40, worker);
+        //DRONE QUEUE set to workermax
+            addEntryTotal(gs->workerMax, worker);
 
         //ZEALOT QUEUE
             addEntryTotal(10, BWAPI::UnitTypes::Protoss_Zealot);
@@ -313,8 +313,8 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 
     int supplyCount = dblSupplyCount; //ibo was doubled already whoops
         
-    //assume constant droning unless flagged no or switched below
-    bool droning = true;
+    //assume constant droning unless we exceed count per gs
+    bool droning = (bq->gs->workerCount < bq->gs->workerMax);
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
     BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
@@ -462,8 +462,9 @@ CommandResult Tracker::didBuilderSucceed(int key, Builder found){
 
     //BWAPI::UnitCommand command = found.unit->getLastCommand();
 
-    //assume buildtype matches unit is on the way
+    //If buildtype does not matches unit is no longer on the way
     if(found.unit->getBuildType() != found.buildType){
+        //now count to see if he built it
         int newCount = Tools::CountUnitsOfType(found.buildType,BWAPI::Broodwar->self()->getUnits());
         if (newCount <= found.initBuildCount){ 
             return FAIL_AND_RETRY;

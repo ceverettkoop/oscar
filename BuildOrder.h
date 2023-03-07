@@ -1,4 +1,7 @@
+#pragma once
+
 #include <BWAPI.h>
+#include "GameState.h"
 
 enum CommandResult{
 	FAIL_AND_RETRY,
@@ -94,6 +97,7 @@ private:
 
 public:
 
+	GameState *gs;
 	int supplyCommited = 0;
 	int minCommited = 0;
 	int gasCommited = 0;

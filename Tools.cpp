@@ -135,7 +135,7 @@ void Tools::SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target)
     if (!unit || !target) { return; }
 
     // Don't issue a 2nd command to the unit on the same frame
-    //if (unit->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount()) { return; }
+    if (unit->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount()) { return; }
     //commenting this out bc we will end up doing this for now
 
     // If we are issuing the same type of command with the same arguments, we can ignore it

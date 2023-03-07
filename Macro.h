@@ -1,3 +1,5 @@
+#pragma once
+
 #include <BWAPI.h>
 #include "GameState.h"
 

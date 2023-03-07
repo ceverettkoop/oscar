@@ -1,3 +1,5 @@
+#pragma once
+
 //Tools for understanding the map specific to this bot
 #include "BWAPI.h"
 #include "BWEM/bwem.h"

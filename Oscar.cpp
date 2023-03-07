@@ -40,6 +40,8 @@ void Oscar::onStart()
     macro.gs = &gs;
     macro.onStart();
 
+    bq.gs = &gs;
+
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
     #ifndef WIN32
@@ -66,12 +68,12 @@ void Oscar::onFrame()
     //Make decisions; interacts with gamestate
     decider.onFrame();
 
-    //Macro level movements
-    //this includes assigning workers to mine or gather gas
-    macro.onFrame();
-
-    //Assign builders to build/
+    //Assign builders to build things and queue units
     bq.onFrame();
+
+    //Macro level movements
+    //this assigns scouts; assigns workers; hopefully ignores builders commanded above
+    macro.onFrame();
 
     // Draw unit health bars, which brood war unfortunately does not do
     //Tools::DrawUnitHealthBars();

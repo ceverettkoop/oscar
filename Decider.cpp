@@ -113,14 +113,14 @@ void Decider::calculateWorkers(){
             
             //special case if we have more minerals at any base than we have workers total, skip all the logic below
             if(p.first.minCount > gs->workerCount){
-                p.first.onMin = gs->workerCount;
-                assignedWorkers = gs->workerCount;
-                break;
+                p.first.onMin = (gs->workerCount);
+                assignedWorkers = p.first.onMin;
+                return;
             } 
 
             //else set minimums, one per patch and 3 per gas
             if(p.first.basePriority == i){
-                p.first.onMin = p.first.minCount; //setting a minimum of one miner per min patch
+                p.first.onMin = (p.first.minCount); //setting a minimum of one miner per min patch; less for slack
                 assignedWorkers += p.first.onMin;
                 if (assignedWorkers >= gs->workerCount) break;
                 p.first.onGas = p.first.assimilatorCount * 3;
@@ -150,6 +150,11 @@ void Decider::calculateWorkers(){
                 }
             }
         }
+    }
+
+    //after assignment reduce count at each base by 2 to allow slack so miners aren't constantly travelling around
+    for(auto &p : gs->workerTotals){
+        if(p.first.isOccupied) p.first.onMin -= 2;
     }
 
 }
