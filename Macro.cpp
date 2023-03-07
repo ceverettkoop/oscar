@@ -7,12 +7,19 @@
 #include "Decider.h"
 #include "Tools.h"
 
-void MacroManager::onFrame(GameState* gs){
+void MacroManager::onStart(){
 
-    if(gs->isScouting) scouting(gs);
 }
 
-void MacroManager::scouting(GameState* gs){
+void MacroManager::onFrame(){
+
+    assignWorkers();
+    if(gs->isScouting) scouting();
+
+
+}
+
+void MacroManager::scouting(){
 
     //will get changed to base when base found
     BWAPI::TilePosition enemyLocation = BWAPI::TilePositions::Unknown;
@@ -48,6 +55,46 @@ void MacroManager::scouting(GameState* gs){
         
         break;
     }
+
+
+}
+
+void MacroManager::assignWorkers(){
+
+    //every frame tell every worker to work per gamestate assignments
+    //gamestate will update on worker, nexus or refinery creation or destruction
+    //logic for worker to flee enemy or fight etc handled in micro which procs after macro and should overwrite this command
+    //scouting etc also procs after
+
+    BWAPI::Unitset allWorkers = Tools::GetUnitSetofType(BWAPI::Broodwar->self()->getRace().getWorker());
+    BWAPI::Unit worker;
+    auto itr = allWorkers.begin();
+
+    //go through bases and assign workers based on what base needs
+    for(auto &p : gs->workerTotals){
+        
+        //otherwise chose a worker
+        worker = *itr;
+        //skip workers that are not idle and are not mining already; assume if they are doing something else it's important
+        while(!worker->isIdle() && !worker->isGatheringMinerals() && !worker->isGatheringGas()  ){
+            if (itr != allWorkers.end()){
+                 itr++;
+                 worker = *itr;
+            }else{
+                return; //bail if at end of worker set
+            }
+        }
+        
+        //now we have a worker idle or already mining... hopefully
+        if(p.first.isOccupied){
+            //for each mineral patch assign a worker
+            for(auto min : p.second->Minerals()){
+                
+            }
+        }
+
+    }
+
 
 
 }

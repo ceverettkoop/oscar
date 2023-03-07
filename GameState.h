@@ -7,11 +7,10 @@ class OscarMap;
 
 typedef struct baseEconomy{
     int onGas = 0;
-    int idealOnGas = 0;
     int onMin = 0;
-    int idealOnMin = 0;
-    int basePriority = -1;
-    int activeBaseCount = 1;
+    int minCount = 0;
+    int assimilatorCount = 0;
+    int basePriority = 0;
     bool isOccupied = false;
 };
 
@@ -21,6 +20,8 @@ class GameState{
 public:
     bool isScouting = false;
     int workerCount = 0;
+    int workerMax = 0; //based on current amount of bases occupied, will change when we expand
+    int activeBaseCount = 1;
     OscarMap* mapPtr = nullptr;
     std::map<baseEconomy, const BWEM::Base*> workerTotals;
     

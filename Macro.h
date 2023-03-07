@@ -1,4 +1,5 @@
 #include <BWAPI.h>
+#include "GameState.h"
 
 
 class MacroManager{
@@ -7,10 +8,13 @@ private:
 	BWAPI::Unit scout = nullptr;
 	bool isScouting = false;
 
-    void scouting(GameState* gs);
+    void scouting();
+    void assignWorkers();
 
 public:
-    void onFrame(GameState* gs);
+    void onStart();
+    void onFrame();
+    GameState* gs;
 
 };
 

@@ -33,10 +33,12 @@ void Oscar::onStart()
     //allow global gamestate variable to access our map info
     gs.mapPtr = &map;
 
-    //assign game state to decider
+    //assign game state to decider and macro etc
     decider.gs = &gs;
-
     decider.onStart();
+
+    macro.gs = &gs;
+    macro.onStart();
 
     //load ibo (TODO make path relative; load multiple ibos etc)
     char path[512];
@@ -75,7 +77,7 @@ void Oscar::onFrame()
     bq.onFrame();
 
     //Macro level troop movements; pass it the gamestate
-    macro.onFrame(&gs);
+    macro.onFrame();
 
     // Draw unit health bars, which brood war unfortunately does not do
     //Tools::DrawUnitHealthBars();
