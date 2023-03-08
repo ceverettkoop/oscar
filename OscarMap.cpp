@@ -87,7 +87,7 @@ void OscarMap::findBases(){
 const BWEM::Base * OscarMap::findNextExpansion(GameState *gs){
 
     //assign our natural if we haven't already
-    if(myNatural = nullptr){
+    if(myNatural == nullptr){
         assignNatural();
     }
     

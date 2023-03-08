@@ -29,7 +29,7 @@ void Decider::onFrame(){
 
     //placeholder expansion logic
     //if over 20 workers and nexus not already in the queue flip it on
-    if(gs->workerCount > 16){
+    if(gs->workerCount > 12){
         gs->basesDesired = 2;
     }
 
@@ -67,7 +67,7 @@ void Decider::onUnitDestroy(BWAPI::Unit unit){
 //will be made more complicated
 void Decider::setScouting(){
 
-    const int scoutStart = 16;
+    const int scoutStart = 18;
 
     if(gs->mapPtr->enemyMain == nullptr){
             if(BWAPI::Broodwar->self()->supplyUsed() > scoutStart){
