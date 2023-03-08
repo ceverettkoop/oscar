@@ -37,6 +37,30 @@ void MacroManager::scouting(){
         }
     }
 
+    //first thing is first if we haven't explored our natural do so now to not eff expansion later
+    //assign our natural if we haven't already
+    if(gs->mapPtr->myNatural == nullptr){
+        gs->mapPtr->assignNatural();
+    }
+
+    //if we haven't explored natural yet do so; specifically head towards each min until all are revealed!
+    if(!natExplored){
+        for(auto &min : gs->mapPtr->myNatural->Minerals() ){
+            if(BWAPI::Broodwar->isExplored(min->BottomRight())){
+                continue;
+            }
+            scout->move(min->Pos());
+            return; //bail if we didn't make it through the list
+        }
+    }
+    //if made it this far nat is explored
+    natExplored = true;
+
+    if(!BWAPI::Broodwar->isExplored(gs->mapPtr->myNatural->Location())){
+        scout->move(gs->mapPtr->myNatural->Center());
+        return; //skip the rest
+    }
+
     auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
     for(BWAPI::TilePosition tpos : startLocations){
@@ -89,7 +113,7 @@ void MacroManager::assignWorkers(){
     //FOR EACH BASE
     for(auto &p : gs->workerTotals){
         
-        //reset eligible gatherers to steal
+        //reset eligible gatherers that could be moved
         BWAPI::Unitset localMiners;
         localMiners.clear();
 

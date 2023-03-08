@@ -111,29 +111,60 @@ void Decider::calculateWorkers(){
 
 
     //now assigning workers to each base based on priority
-    int assignedWorkers = 0;
+    int assignedWorkers = 2; //start with 2 workers assigned as slack/builder/scouts; they will still mine if left idle
 
-    for (size_t i = 0; i < gs->activeBaseCount; i++){
-        for(auto &p : gs->workerTotals){
-            if(!p.first.isOccupied) continue; //skip if not occupied
-            
-            //special case if we have more minerals at any base than we have workers total, skip all the logic below
-            if(p.first.minCount > gs->workerCount){
-                p.first.onMin = (gs->workerCount);
-                assignedWorkers = p.first.onMin;
-                return;
+
+    for(auto &p : gs->workerTotals){ //for each base
+        if(!p.first.isOccupied) continue; //skip if not occupied
+
+        //logic for main base:
+        if(p.first.basePriority == 0){
+            p.first.onMin = (p.first.minCount); //one worker per mineral
+            assignedWorkers += p.first.onMin;
+            //if at this point we already have exceeded worker count; reset to our count - 2 and stop
+            if (assignedWorkers >= gs->workerCount){
+                p.first.onMin = gs->workerCount - 2; //still leaving two out there
+                p.first.onGas = 0;
+                continue;
             } 
+            //put how many on gas we can based on above
+            int canGetGas = gs->workerCount - assignedWorkers;
+            int wantOnGas = p.first.assimilatorCount * 3;
+            if (canGetGas < 1){
+                p.first.onGas = 0;
+                continue;
+            }else if (canGetGas >= wantOnGas ) {
+                p.first.onGas = wantOnGas;
+            }else p.first.onGas = canGetGas;
 
-            //else set minimums, one per patch and 3 per gas
-            if(p.first.basePriority == i){
-                p.first.onMin = (p.first.minCount); //setting a minimum of one miner per min patch; less for slack
-                assignedWorkers += p.first.onMin;
-                if (assignedWorkers >= gs->workerCount) break;
-                p.first.onGas = p.first.assimilatorCount * 3;
-                assignedWorkers += p.first.onGas;
-                break;
-            }
+            assignedWorkers += p.first.onGas;
         }
+        //logic for remaining bases; rn ignore priority beyond the order in which this function sees them        
+            else{
+                int wantOnMin = p.first.minCount; //one worker per mineral
+                int canGetMin = gs->workerCount - assignedWorkers;
+                if(canGetMin < 1){
+                    p.first.onMin = 0;
+                    p.first.onGas = 0;
+                    continue;
+                }else if (canGetMin >= wantOnMin ) {
+                p.first.onMin = wantOnMin;
+                }else p.first.onMin = canGetMin;
+
+                assignedWorkers += p.first.onMin;
+
+                //finally gas
+                int canGetGas = gs->workerCount - assignedWorkers;
+                int wantOnGas = p.first.assimilatorCount * 3;
+                if (canGetGas < 1){
+                    p.first.onGas = 0;
+                    continue;
+                }else if (canGetGas >= wantOnGas ) {
+                    p.first.onGas = wantOnGas;
+                }else p.first.onGas = canGetGas;
+
+                assignedWorkers += p.first.onGas;
+            }
     }
     
     //now if we have more workers than already assigned; after assigning minimum
@@ -157,12 +188,6 @@ void Decider::calculateWorkers(){
             }
         }
     }
-
-    //after assignment reduce count at each base by 2 to allow slack so miners aren't constantly travelling around
-    for(auto &p : gs->workerTotals){
-        if(p.first.isOccupied) p.first.onMin -= 2;
-    }
-
 }
 
 void Decider::updateOwnedBases(){

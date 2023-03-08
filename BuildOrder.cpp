@@ -98,7 +98,7 @@ void BuildQueue::updateQueue(){
             addEntryTotal(gs->workerMax, worker);
 
         //build assimilator once off ibo
-            addEntryTotal(1, BWAPI::BroodwarPtr->self()->getRace().getRefinery());
+        //    addEntryTotal(1, BWAPI::BroodwarPtr->self()->getRace().getRefinery());
 
         //Try to expand if told to
             if(gs->basesDesired > gs->activeBaseCount){

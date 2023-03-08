@@ -9,6 +9,7 @@ class MacroManager{
 private:
 	BWAPI::Unit scout = nullptr;
 	bool isScouting = false;
+    bool natExplored = false;
 
     void scouting();
     void assignWorkers();

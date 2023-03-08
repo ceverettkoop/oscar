@@ -11,7 +11,7 @@ struct baseEconomy{
     int onMin = 0;
     int minCount = 0;
     int assimilatorCount = 0;
-    int basePriority = 0;
+    int basePriority = 2; //program should set to 0 if main and 1 if natural
     bool isOccupied = false;
 };
 

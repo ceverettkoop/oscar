@@ -26,9 +26,11 @@ public:
     void onFrame();
     const BWEM::Base * findNextExpansion(GameState *gs);
 
+    void OscarMap::assignNatural();
+
 
 private:    
     void findBases();
-    void OscarMap::assignNatural();
+
 
 };
