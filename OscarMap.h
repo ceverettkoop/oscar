@@ -16,6 +16,7 @@ public:
     const BWEM::Base* enemyMain = nullptr;
     const BWEM::Base* enemyNatural = nullptr;
 
+    std::vector<const BWEM::Base*> allBases;
     std::vector<const BWEM::Base*> mainBases;
     std::vector<const BWEM::Base*> natBases;
     std::vector<const BWEM::Base*> otherBases;

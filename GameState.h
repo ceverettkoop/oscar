@@ -2,17 +2,20 @@
 #include <BWAPI.h>
 #include "BWEM/bwem.h"
 #include <vector>
+#include <map>
 
 class OscarMap;
 
+
 struct baseEconomy{
 
-    int onGas = 0;
-    int onMin = 0;
+    const BWEM::Base * base;
     int minCount = 0;
     int assimilatorCount = 0;
-    int basePriority = 2; //program should set to 0 if main and 1 if natural
-    bool isOccupied = false;
+    int minerCount = 0;
+    int gasMinerCount = 0;
+    //int basePriority = 3; //program should set to 0 if main and 1 if natural
+
 };
 
 
@@ -25,6 +28,6 @@ public:
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand
     int activeBaseCount = 0;
     OscarMap* mapPtr = nullptr;
-    std::vector<std::pair<baseEconomy, const BWEM::Base *>> workerTotals;
+    std::map<int, baseEconomy> ownedBaseTracker;
     
 };

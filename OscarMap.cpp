@@ -21,6 +21,15 @@ void OscarMap::onFrame(){
 //https://github.com/Cmccrave/BWEB/
 void OscarMap::findBases(){
 
+
+    //create set of ALL Bases
+    for (auto &area : BWEM::Map::Instance().Areas()) {
+        
+        for (auto &base : area.Bases()) {
+                allBases.push_back(&base);
+        }
+    }
+
     // Find all main bases
     for (auto &area : BWEM::Map::Instance().Areas()) {
         for (auto &base : area.Bases()) {
@@ -85,11 +94,6 @@ void OscarMap::findBases(){
 }
 
 const BWEM::Base * OscarMap::findNextExpansion(GameState *gs){
-
-    //assign our natural if we haven't already
-    if(myNatural == nullptr){
-        assignNatural();
-    }
     
     //assume if we have less than two bases occupied we want to take the natural
     if(gs->activeBaseCount < 2){

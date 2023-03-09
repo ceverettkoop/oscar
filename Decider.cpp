@@ -2,19 +2,10 @@
 #include "OscarMap.h"
 #include "GameState.h"
 #include "Tools.h"
+#include <map>
 
 
 void Decider::onStart(){
-
-    //initialize tracker of bases to know which is ours
-    for (auto &area : BWEM::Map::Instance().Areas()) {
-        
-        for (auto &base : area.Bases()) {
-                baseEconomy newEntry;
-                std::pair<baseEconomy, const BWEM::Base *> pr(newEntry, &base);
-                gs->workerTotals.push_back(pr);
-        }
-    }
 
     updateOwnedBases();
     calculateWorkers();
@@ -77,7 +68,8 @@ void Decider::setScouting(){
 
 }
 
-//have to run AFTER updated owned bases
+//set relevant variables to determinign worker count per base
+//this function should be renamed!
 void Decider::calculateWorkers(){
     const BWAPI::Unitset units = BWAPI::Broodwar->self()->getUnits();
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
@@ -86,131 +78,87 @@ void Decider::calculateWorkers(){
     //update mineral count and assimilator count per base
     //based on this infer max efficient worker count
     int workerMax = 0;
-    for(auto &p : gs->workerTotals){
-        if(p.first.isOccupied){
-            p.first.minCount = p.second->Minerals().size(); //shooting for two workers per min patch
-            workerMax += (p.first.minCount * 2);
 
-            size_t assimilatorCount = 0;
-            //check if assimilator is done on geysers in base
-            for(auto geyser : p.second->Geysers()){
-                BWAPI::TilePosition tpos = BWAPI::TilePosition(geyser->Pos());
-                for(auto unit : BWAPI::Broodwar->getUnitsOnTile(tpos)){
-                    if(unit->getType().isRefinery() && unit->isCompleted() ){
-                        assimilatorCount++;
-                        workerMax += 4;
-                    }
-                };
+    for(auto &p : gs->ownedBaseTracker){
+
+        //update min count
+        p.second.minCount = p.second.base->Minerals().size();
+        workerMax += (p.second.minCount * 2); //update max 2 per min
+
+        size_t assimilatorCount = 0;
+        //check if assimilator is done on geysers in base
+        for(auto geyser : p.second.base->Geysers()){
+            BWAPI::TilePosition tpos = BWAPI::TilePosition(geyser->Pos());
+            for(auto unit : BWAPI::Broodwar->getUnitsOnTile(tpos)){
+                if(unit->getType().isRefinery() && unit->isCompleted() ){
+                    assimilatorCount++;
+                    workerMax += 4;
+                }
             };
-            p.first.assimilatorCount = assimilatorCount;
-        }
+        };
+        //update assimilator count (workermax augmented above)
+        p.second.assimilatorCount = assimilatorCount;
+
     }
-    //based on above store worker max; we should stop droning at this point
-    //adding 2 for builders etc
+
+    //adding 2 to worker max for builders etc
     gs->workerMax = workerMax + 2;
 
+    //ALL OTHER DECISIONS NOW MADE AT ASSIGN WORKERS FUNCTION
 
-    //now assigning workers to each base based on priority
-    int assignedWorkers = 2; //start with 2 workers assigned as slack/builder/scouts; they will still mine if left idle
-
-
-    for(auto &p : gs->workerTotals){ //for each base
-        if(!p.first.isOccupied) continue; //skip if not occupied
-
-        //logic for main base:
-        if(p.first.basePriority == 0){
-            p.first.onMin = (p.first.minCount); //one worker per mineral
-            assignedWorkers += p.first.onMin;
-            //if at this point we already have exceeded worker count; reset to our count - 2 and stop
-            if (assignedWorkers >= gs->workerCount){
-                p.first.onMin = gs->workerCount - 2; //still leaving two out there
-                p.first.onGas = 0;
-                continue;
-            } 
-            //put how many on gas we can based on above
-            int canGetGas = gs->workerCount - assignedWorkers;
-            int wantOnGas = p.first.assimilatorCount * 3;
-            if (canGetGas < 1){
-                p.first.onGas = 0;
-                continue;
-            }else if (canGetGas >= wantOnGas ) {
-                p.first.onGas = wantOnGas;
-            }else p.first.onGas = canGetGas;
-
-            assignedWorkers += p.first.onGas;
-        }
-        //logic for remaining bases; rn ignore priority beyond the order in which this function sees them        
-            else{
-                int wantOnMin = p.first.minCount; //one worker per mineral
-                int canGetMin = gs->workerCount - assignedWorkers;
-                if(canGetMin < 1){
-                    p.first.onMin = 0;
-                    p.first.onGas = 0;
-                    continue;
-                }else if (canGetMin >= wantOnMin ) {
-                p.first.onMin = wantOnMin;
-                }else p.first.onMin = canGetMin;
-
-                assignedWorkers += p.first.onMin;
-
-                //finally gas
-                int canGetGas = gs->workerCount - assignedWorkers;
-                int wantOnGas = p.first.assimilatorCount * 3;
-                if (canGetGas < 1){
-                    p.first.onGas = 0;
-                    continue;
-                }else if (canGetGas >= wantOnGas ) {
-                    p.first.onGas = wantOnGas;
-                }else p.first.onGas = canGetGas;
-
-                assignedWorkers += p.first.onGas;
-            }
-    }
-    
-    //now if we have more workers than already assigned; after assigning minimum
-    //assign additional workers until all are done
-    //one at a time per base then loop back
-    while(assignedWorkers < gs->workerCount){
-        for (size_t i = 0; i < gs->activeBaseCount; i++){
-            for(auto &p : gs->workerTotals){ //each base
-                if(!p.first.isOccupied) continue; //skip empty bases
-
-                if(p.first.basePriority == i){
-                    p.first.onMin++;
-                    assignedWorkers++;
-                    if (assignedWorkers >= gs->workerCount) break;
-                    //max on 4 on gas per assimilator
-                    if(p.first.onGas < (4 * p.first.assimilatorCount)){
-                        p.first.onGas++;
-                        assignedWorkers++;                               
-                    }
-                }
-            }
-        }
-    }
 }
 
 void Decider::updateOwnedBases(){
     gs->activeBaseCount = 0; //reset count of occupied bases to zero temporarily before we count them
+    int key = -1;
 
-    for(auto &pair : gs->workerTotals){
-        
-        for(auto unit : BWAPI::Broodwar->getUnitsOnTile(pair.second->Location()) ){ //check each base for completed CC
+    //for all bases
+    for(auto &base : gs->mapPtr->allBases){ 
+
+        bool owned = false;
+         //check each base for completed CC that we own and if it's ours mark it
+        for(auto unit : BWAPI::Broodwar->getUnitsOnTile(base->Location()) ){
             if( unit->getType().isResourceDepot() && unit->isCompleted() && (unit->getPlayer() == BWAPI::Broodwar->self()) ){   
-    
+                
+                gs->activeBaseCount++;
+                owned = true;
+
                 //if we have never determined our main base this will be set on first run
                 if(gs->mapPtr->myMain == nullptr){
-                    gs->mapPtr->myMain = pair.second;
+                    gs->mapPtr->myMain = base;
+                }
+                //ditto nat
+                if(gs->mapPtr->myNatural == nullptr){
+                    gs->mapPtr->assignNatural();
                 }
 
-                pair.first.isOccupied = true;
-                gs->activeBaseCount++;
-                if(pair.second == gs->mapPtr->myMain){ pair.first.basePriority = 0;}
-                    else if(pair.second == gs->mapPtr->myNatural){ pair.first.basePriority = 1;}
-                        else (pair.first.basePriority = 2);
-                break; //skip to next base if we confirm CC
-            }else pair.first.isOccupied = false;
-        }
-    }
+                //unique key per base
+                //0 for main; 1 for nat; other bases pseudo unique value based on distance from main
+                if (base == gs->mapPtr->myMain){
+                    key = 0;
+                }else if (base == gs->mapPtr->myNatural){
+                    key = 1;
+                }else{ //generate key based on distance from main + distance from nat (SHOULD be unique)
+                    key = 100 + base->Center().getApproxDistance(gs->mapPtr->myMain->Center()) +
+                        base->Center().getApproxDistance(gs->mapPtr->myNatural->Center());
+                }
 
+                baseEconomy newBase;
+                newBase.base = base;
+
+                //store our base on our econTracker if not already there
+                gs->ownedBaseTracker.insert({key, newBase});
+            }
+        }
+
+        if (!owned){
+             //finally if we don't own this base; check if its in our owned BaseTracker and if it is delete the entry
+            if (gs->ownedBaseTracker.size() == 0) continue; //error check?
+            for(auto it = gs->ownedBaseTracker.begin(); it != gs->ownedBaseTracker.end(); ++it){
+                if (base == it->second.base){
+                    gs->ownedBaseTracker.erase(it);
+                }
+            }
+        }  
+    }
 }

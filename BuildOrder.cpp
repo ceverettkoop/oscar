@@ -116,7 +116,7 @@ void BuildQueue::updateQueue(){
 
 
 
-//THIS RESETS NOW QUEUE
+//adds to now queue; other function replaces it
 void BuildQueue::addEntryNow(int count, BWAPI::UnitType type){
 
     bool typeExists = false;
@@ -251,7 +251,7 @@ BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type){
     if(type == BWAPI::BroodwarPtr->self()->getRace().getResourceDepot()){
         return gs->mapPtr->findNextExpansion(gs)->Location();
 
-    }else BWAPI::Broodwar->self()->getStartLocation();
+    }else return BWAPI::Broodwar->self()->getStartLocation();
 
 }
 
