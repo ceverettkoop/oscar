@@ -38,6 +38,9 @@ void Decider::onUnitComplete(BWAPI::Unit unit){
         calculateWorkers();
     }
 
+    //if it's not a worker or a building; assign it a combat group
+    if(!unit->getType().isWorker() && !unit->getType().isBuilding());
+
 }
 
 void Decider::onUnitDestroy(BWAPI::Unit unit){
@@ -47,8 +50,9 @@ void Decider::onUnitDestroy(BWAPI::Unit unit){
         updateOwnedBases();
     }
 
-    //we're only going to recalculate worker assignments if it's a nexus or a worker OR refinery
-    if(unit->getType().isWorker() ||  unit->getType().isResourceDepot() || unit->getType().isRefinery()){
+    //we're only going to recalculate worker assignments if it's a nexus or a worker OR refinery OR if min depleted
+    if(unit->getType().isWorker() ||  unit->getType().isResourceDepot() || unit->getType().isRefinery() ||
+        unit->getType().isMineralField()){
         calculateWorkers();
     }
 

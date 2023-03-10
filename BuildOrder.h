@@ -94,7 +94,7 @@ private:
     bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos);
     BuildResult TrainUnit(BWAPI::UnitType type);
 	void clearEmptyEntries();
-	BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type);
+	BWAPI::TilePosition determineLocation(BWAPI::UnitType type);
 	void updateQueue();
 
 	int updateQty(int index);

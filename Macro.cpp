@@ -16,7 +16,6 @@ void MacroManager::onFrame(){
     assignWorkers();
     if(gs->isScouting) scouting();
 
-
 }
 
 void MacroManager::scouting(){
@@ -65,14 +64,14 @@ void MacroManager::scouting(){
                 if(BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())){
                      enemyLocation = tpos;
                 }
+            }
                 
-                for(auto& base : gs->mapPtr->mainBases){
-                    if(base->Location() == tpos){
-                        gs->mapPtr->enemyMain = base;
-                        gs->isScouting = false;    //end scouting now
-                    }
+            for(auto& base : gs->mapPtr->mainBases){
+                if(base->Location() == enemyLocation){
+                    gs->mapPtr->enemyMain = base;
+                    gs->isScouting = false;    //end scouting now
                 }
-            }    
+            }       
             continue; //not directing movement to explored start locations
         }
 
@@ -178,7 +177,7 @@ void MacroManager::assignWorkers(){
         //if this is the last base then this obviously doesn't occur
         
         if (it->first != gs->ownedBaseTracker.rbegin()->first){
-            auto &nextIt = std::next(it, 1);
+            auto nextIt = std::next(it, 1);
             auto &nextP = *nextIt;
             while(p.second.minerCount > p.second.minCount && nextP.second.minerCount < nextP.second.minCount ){
                 worker = *localMiners.begin();
@@ -204,6 +203,7 @@ void MacroManager::assignWorkers(){
                 }
             }
             base = p.second.base;
+            break;
         }
 
         if(base == nullptr) break;

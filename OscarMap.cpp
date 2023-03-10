@@ -101,7 +101,7 @@ const BWEM::Base * OscarMap::findNextExpansion(GameState *gs){
     }
     
     //TODO add third base logic :)
-    
+    return myNatural;
 
 }
 
