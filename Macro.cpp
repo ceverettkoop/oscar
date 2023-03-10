@@ -221,7 +221,7 @@ void MacroManager::assignWorkers(){
 }
 
 
-//for speed just counting a miner that is within 20 build tiles of center of base (not ideal)
+//for speed just counting a miner that is within 14 build tiles of center of base (not ideal)
 int MacroManager::countMinersInBase(const BWEM::Base *base){
 
     int count = 0;
@@ -229,7 +229,7 @@ int MacroManager::countMinersInBase(const BWEM::Base *base){
     BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
         if(unit->getType() = type && unit->isGatheringMinerals()){
-            if( unit->getDistance(base->Center()) < 640 ){
+            if( unit->getDistance(base->Center()) < 448 ){
                 count++;
             }
         }
@@ -239,7 +239,7 @@ int MacroManager::countMinersInBase(const BWEM::Base *base){
 
 }
 
-//for speed just counting a miner that is within 20 build tiles of center of base (not ideal)
+//for speed just counting a miner that is within 14 build tiles of center of base (not ideal)
 int MacroManager::countGasCollectorsInBase(const BWEM::Base *base){
 
     int count = 0;
@@ -247,7 +247,7 @@ int MacroManager::countGasCollectorsInBase(const BWEM::Base *base){
     BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
         if(unit->getType() = type && unit->isGatheringGas()){
-            if( unit->getDistance(base->Center()) < 640 ){
+            if( unit->getDistance(base->Center()) < 448 ){
                 count++;
             }
         }

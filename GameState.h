@@ -51,14 +51,7 @@ public:
     std::map<int, CombatGroup> combatGroups;
     IboInstruction instruction = NO_INSTRUCTION;
 
-    void passInstruction(std::string instring);
+    void passInstruction(const std::string instring);
 
 };
 
-
-void GameState::passInstruction(std::string instring){
-
-    if(instring == "SCOUT") instruction = SCOUT;
-    else if (instring == "EXPAND") instruction = EXPAND;
-    else instruction = NO_INSTRUCTION;
-}

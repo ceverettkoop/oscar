@@ -422,7 +422,8 @@ int InitialBuildOrder::load_ibo(char* path){
             }else{ //end of input
                 //check if last character is a letter
                 if( std::isalpha(*(instring.rbegin())) ){
-                    bq->gs->passInstruction(instring); //tell gamestate to do something
+                    //const std::string par = instring;
+                    //bq->gs->passInstruction(nullptr); //tell gamestate to do something
                     instring.clear();
 
                 }else{ //handling ibo instructions
