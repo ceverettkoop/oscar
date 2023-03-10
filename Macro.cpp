@@ -105,13 +105,13 @@ void MacroManager::assignWorkers(){
     BWAPI::Unitset localMiners;
 
     //first count at all occupied bases
-    for(auto &p : gs->ownedBaseTracker){
+    for(auto &p : gs->ownedBases){
         p.second.minerCount = countMinersInBase(p.second.base);
         p.second.gasMinerCount = countGasCollectorsInBase(p.second.base);
     }
 
     //next loop, assign wokers
-    for(auto it = gs->ownedBaseTracker.begin(); it->first != gs->ownedBaseTracker.rbegin()->first; ++it){
+    for(auto it = gs->ownedBases.begin(); it->first != gs->ownedBases.rbegin()->first; ++it){
         
         auto &p = *it;
         //reset localMiners
@@ -176,7 +176,7 @@ void MacroManager::assignWorkers(){
         //now if miner count is GREATER THAN minimum AND next base is less than minimum send some over
         //if this is the last base then this obviously doesn't occur
         
-        if (it->first != gs->ownedBaseTracker.rbegin()->first){
+        if (it->first != gs->ownedBases.rbegin()->first){
             auto nextIt = std::next(it, 1);
             auto &nextP = *nextIt;
             while(p.second.minerCount > p.second.minCount && nextP.second.minerCount < nextP.second.minCount ){
@@ -196,9 +196,9 @@ void MacroManager::assignWorkers(){
         worker =  *idleWorkers.begin();
 
         //select first base unless maxed, then advance
-        for(auto &p : gs->ownedBaseTracker){
+        for(auto &p : gs->ownedBases){
             if(p.second.minerCount >= (p.second.minCount*2)){ //if mins maxxed
-                if(p.first != gs->ownedBaseTracker.rbegin()->first){ //and not the last base
+                if(p.first != gs->ownedBases.rbegin()->first){ //and not the last base
                     continue; //go to next base
                 }
             }

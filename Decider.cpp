@@ -39,7 +39,9 @@ void Decider::onUnitComplete(BWAPI::Unit unit){
     }
 
     //if it's not a worker or a building; assign it a combat group
-    if(!unit->getType().isWorker() && !unit->getType().isBuilding());
+    if(!unit->getType().isWorker() && !unit->getType().isBuilding()){
+        assignCombatGroup(unit);
+    }
 
 }
 
@@ -83,7 +85,7 @@ void Decider::calculateWorkers(){
     //based on this infer max efficient worker count
     int workerMax = 0;
 
-    for(auto &p : gs->ownedBaseTracker){
+    for(auto &p : gs->ownedBases){
 
         //update min count
         p.second.minCount = p.second.base->Minerals().size();
@@ -147,22 +149,27 @@ void Decider::updateOwnedBases(){
                         base->Center().getApproxDistance(gs->mapPtr->myNatural->Center());
                 }
 
-                baseEconomy newBase;
+                BaseEconomy newBase;
                 newBase.base = base;
 
                 //store our base on our econTracker if not already there
-                gs->ownedBaseTracker.insert({key, newBase});
+                gs->ownedBases.insert({key, newBase});
             }
         }
 
         if (!owned){
              //finally if we don't own this base; check if its in our owned BaseTracker and if it is delete the entry
-            if (gs->ownedBaseTracker.size() == 0) continue; //error check?
-            for(auto it = gs->ownedBaseTracker.begin(); it != gs->ownedBaseTracker.end(); ++it){
+            if (gs->ownedBases.size() == 0) continue; //error check?
+            for(auto it = gs->ownedBases.begin(); it != gs->ownedBases.end(); ++it){
                 if (base == it->second.base){
-                    gs->ownedBaseTracker.erase(it);
+                    gs->ownedBases.erase(it);
                 }
             }
         }  
     }
+}
+
+void Decider::assignCombatGroup(BWAPI::Unit unit){
+
+
 }

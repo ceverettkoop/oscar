@@ -6,8 +6,14 @@
 
 class OscarMap;
 
+enum GroupRole{
+    ATTACK,
+    DEFEND,
+    HARASS
+};
 
-struct baseEconomy{
+
+struct BaseEconomy{
 
     const BWEM::Base * base;
     int minCount = 0;
@@ -15,6 +21,13 @@ struct baseEconomy{
     int minerCount = 0;
     int gasMinerCount = 0;
     //int basePriority = 3; //program should set to 0 if main and 1 if natural
+
+};
+
+struct CombatGroup{
+
+    BWAPI::Unitset group;
+    GroupRole role;
 
 };
 
@@ -28,6 +41,7 @@ public:
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand
     int activeBaseCount = 0;
     OscarMap* mapPtr = nullptr;
-    std::map<int, baseEconomy> ownedBaseTracker;
+    std::map<int, BaseEconomy> ownedBases;
+    std::map<int, CombatGroup> combatGroups;
     
 };
