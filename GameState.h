@@ -51,7 +51,7 @@ public:
     std::map<int, CombatGroup> combatGroups;
     IboInstruction instruction = NO_INSTRUCTION;
 
-    void passInstruction(const std::string instring);
+    void passInstruction(const std::string& instring);
 
 };
 

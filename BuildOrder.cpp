@@ -8,8 +8,8 @@
 //first all BQ functions; then IBO (should be folded in later); then tracker
 
 void BuildQueue::onStart(char* iboPath){
-    ibo.load_ibo(iboPath);
     ibo.bq = this;
+    ibo.load_ibo(iboPath);
     track.bq = this;
 }
 
@@ -423,7 +423,7 @@ int InitialBuildOrder::load_ibo(char* path){
                 //check if last character is a letter
                 if( std::isalpha(*(instring.rbegin())) ){
                     //const std::string par = instring;
-                    //bq->gs->passInstruction(nullptr); //tell gamestate to do something
+                    passInstruction(instring); //tell gamestate to do something
                     instring.clear();
 
                 }else{ //handling ibo instructions
@@ -477,6 +477,13 @@ int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
 
     return countDesired;
 
+}
+
+void InitialBuildOrder::passInstruction(const std::string& instring){
+
+    if(instring == "SCOUT") bq->gs->instruction = SCOUT;
+    else if (instring == "EXPAND") bq->gs->instruction  = EXPAND;
+    else bq->gs->instruction  = NO_INSTRUCTION;
 }
 
 

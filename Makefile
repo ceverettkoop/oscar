@@ -10,7 +10,7 @@ DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 _DEPS=
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ=BuildOrder.o Oscar.o main.o Dll.o MapTools.o ReplayParser.o Tools.o Macro.o Decider.o OscarMap.o GameState.o
+_OBJ=BuildOrder.o Oscar.o main.o Dll.o MapTools.o ReplayParser.o Tools.o Macro.o Decider.o OscarMap.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
