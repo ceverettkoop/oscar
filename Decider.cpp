@@ -18,6 +18,9 @@ void Decider::onFrame(){
     //decide if we are scouting
     setScouting();
 
+    //update group roles
+    setRoles();
+
     //placeholder expansion logic
     //if over 20 workers and nexus not already in the queue flip it on
     if(gs->workerCount > 12){
@@ -171,5 +174,31 @@ void Decider::updateOwnedBases(){
 
 void Decider::assignCombatGroup(BWAPI::Unit unit){
 
+    //for now every unit goes into group 0
+    int key = 0;
+    //logic to set keys will go here
+
+    if(gs->combatGroups.find(key) != gs->combatGroups.end()){
+        auto it = gs->combatGroups.find(key);
+        it->second.group.insert(unit);
+    }
+
+
+}
+
+void Decider::setRoles(){
+
+    //default role for everything
+    GroupRole global = DEFEND;
+
+
+    //run if our group gets to 
+    for(auto &p : gs->combatGroups){
+        p.second.role = global;
+
+        if(p.second.group.size() > 8){
+            p.second.role = ATTACK;
+        }
+    }
 
 }

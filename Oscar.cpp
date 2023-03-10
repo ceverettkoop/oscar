@@ -49,7 +49,7 @@ void Oscar::onStart()
     #else
     _getcwd(path, 200);
     #endif
-    strncat(path,"/bwapi-data/read/2gatewaypvz", 111);
+    strncat(path,"/bwapi-data/read/gateway_fe_pvz", 111);
     fprintf(stderr,"IBO path is %s\n", path);
 
     bq.onStart(path);

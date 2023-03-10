@@ -19,5 +19,6 @@ private:
     void calculateWorkers();
     void updateOwnedBases();
     void assignCombatGroup(BWAPI::Unit unit);
+    void setRoles();
 
 };

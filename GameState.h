@@ -12,6 +12,12 @@ enum GroupRole{
     HARASS
 };
 
+enum IboInstruction{
+    NO_INSTRUCTION,
+    SCOUT,
+    EXPAND
+};
+
 
 struct BaseEconomy{
 
@@ -43,5 +49,16 @@ public:
     OscarMap* mapPtr = nullptr;
     std::map<int, BaseEconomy> ownedBases;
     std::map<int, CombatGroup> combatGroups;
-    
+    IboInstruction instruction = NO_INSTRUCTION;
+
+    void passInstruction(std::string instring);
+
 };
+
+
+void GameState::passInstruction(std::string instring){
+
+    if(instring == "SCOUT") instruction = SCOUT;
+    else if (instring == "EXPAND") instruction = EXPAND;
+    else instruction = NO_INSTRUCTION;
+}

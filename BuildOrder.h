@@ -61,7 +61,7 @@ public:
 	//functions
 	void nextStep(int dblSupplyCount, int* targetCount);
 	int DesiredCountAlreadyBuilt(BWAPI::UnitType type);
-
+	
 };
 
 

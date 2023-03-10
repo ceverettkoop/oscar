@@ -419,17 +419,26 @@ int InitialBuildOrder::load_ibo(char* path){
             if (inchar == '#') break; //indicates end of ibo at #
             if( inchar != ' ' && inchar != '\n'){
                 instring += inchar;
-            }else{ //presumably we have an int
-                inint = std::stoi(instring, NULL);
-                if(isCount){
-                    ibo_supplyCount.push_back(inint);
-                    isCount = false;
+            }else{ //end of input
+                //check if last character is a letter
+                if( std::isalpha(*(instring.rbegin())) ){
+                    bq->gs->passInstruction(instring); //tell gamestate to do something
                     instring.clear();
-                }else{
-                    ibo_unitType.push_back(BWAPI::UnitType(inint));
-                    isCount = true;
-                    i++;
-                    instring.clear();
+
+                }else{ //handling ibo instructions
+                    inint = std::stoi(instring, NULL);
+
+                    if(isCount){
+                        ibo_supplyCount.push_back(inint);
+                        isCount = false;
+                        instring.clear();
+                    }else{
+                        ibo_unitType.push_back(BWAPI::UnitType(inint));
+                        isCount = true;
+                        i++;
+                        instring.clear();
+                    }
+
                 }
             }
         }
