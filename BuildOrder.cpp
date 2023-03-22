@@ -330,14 +330,14 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, 
 
 BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
 
-    //GETTING SOURCE BUILDING IGNORING ARCHONS for now
+    //GETTING SOURCE BUILDING/UNIT IGNORING ARCHONS for now
     BWAPI::UnitType trainerType = type.whatBuilds().first;
     BWAPI::Unitset trainerSet;
 
     // For each unit that we own
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
         // if the unit is of the correct type and it actually has been constructed, add it to set
-        if (unit->getType() == trainerType && unit->isCompleted()){
+        if (unit->getType() == trainerType && unit->isCompleted() && !unit->isMorphing()){
             trainerSet.insert(unit);
         }
     }
