@@ -204,6 +204,28 @@ void BuildQueue::addEntryNow(int count, BWAPI::UnitType type){
     }
 }
 
+
+//handing queue entry for upgrades; caller should check if we have researched it or not already before calling
+void BuildQueue::addEntryTotal(int count, BWAPI::UpgradeType type){
+    
+    bool typeExists = false;
+
+    //if upgrade type already in queue nothing to do
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].upType){
+            return;
+        }     
+    }
+
+    //else create it
+    next.push_back(QueueEntry());
+    next.back().upType = type;
+    next.back().isUpgrade = true;
+    next.back().countWantedTotal = 1;
+
+}
+
+
 void BuildQueue::addEntryTotal(int count, BWAPI::UnitType type){
 
    bool typeExists = false;
@@ -369,7 +391,7 @@ BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
 
 
-// Attempt to construct a building of a given type IN A GIVEN BASE
+// Attempt to construct a building of a given type AT A GIVEN TILE LOCATION
 bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos){
 
     // Get the type of unit that is required to build the desired building
@@ -420,6 +442,8 @@ BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
     return QUEUE_FULL; //presumably all trainers full
     
 }
+
+
 
 
 //NOW IBO PARSING

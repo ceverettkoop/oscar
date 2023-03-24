@@ -7,11 +7,10 @@
 16 42
 17 132
 22 149
-
-#implement the rest later after confirming this works
-#this is 3 hatch muta zvt
-EXPAND_NATURAL
-HATCHERY_MAIN
+#instructions to follow
+12 EXPAND_NATURAL
+14 HATCHERY_MAIN
+22 LING_SPEED
 
 
 21-23 - Extractor [4]

@@ -46,8 +46,12 @@ class InitialBuildOrder{
 	//just stores what to build at drone count x
 	
 private:
+	//these two elements are treated as paired
 	std::vector<int> ibo_supplyCount; //requisite count to build unit or struct at i
 	std::vector<BWAPI::UnitType> ibo_unitType; //type of unit to build
+
+	//after unit commands are parsed; paired set of directives loaded
+	std::vector<std::pair<int, IboInstruction>> ibo_instructions;
 	
 public:
 	
@@ -70,6 +74,8 @@ class QueueEntry{
 
 public:
 	
+	bool isUpgrade = false;
+	BWAPI::UpgradeType upType = BWAPI::UpgradeTypes::None;
 	BWAPI::UnitType type = BWAPI::UnitTypes::None;
 	int countWantedNow = -1; //-1 means not tracking
 	int countBuiltNow = 0; //count built on this iteration, when count wanted equals count built reset
@@ -92,7 +98,8 @@ private:
     Tracker track;
     InitialBuildOrder ibo = InitialBuildOrder();
     
-    bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos);
+    BuildResult ResearchUpgrade(BWAPI::UpgradeType type);
+	bool BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, BWAPI::TilePosition desiredPos);
     BuildResult TrainUnit(BWAPI::UnitType type);
 	void clearEmptyEntries();
 	BWAPI::TilePosition determineLocation(BWAPI::UnitType type);
@@ -122,6 +129,7 @@ public:
 	void addEntryNow(int count, BWAPI::UnitType type);
 	void replaceEntryNow(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UnitType type);
+	void addEntryTotal(int count, BWAPI::UpgradeType type);
 
 	//todo more clever prioritization functions
 	//note bool BWAPI::PlayerInterface::isUnitAvailable (UnitType unit) const will tell if can build
