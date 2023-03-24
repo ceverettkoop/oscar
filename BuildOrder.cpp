@@ -12,7 +12,7 @@
 #include "Tools.h"
 
 //first all BQ functions; then IBO (should be folded in later); then tracker
-
+//foo
 //Load ibo from file, choose based on race and opponent
 void BuildQueue::onStart(){
     
