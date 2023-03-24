@@ -56,7 +56,7 @@ public:
 	int lastStep = -1;
 	int stepCount = 0;
 	bool isFinished = false;
-	int load_ibo(char* path);
+	int load_ibo(std::string path);
 
 	//functions
 	void nextStep(int dblSupplyCount, int* targetCount);
@@ -103,6 +103,7 @@ private:
 	void entryToFront(BWAPI::UnitType type);
 
 	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
+	std::string BuildQueue::getIboPath();
 
 public:
 
@@ -115,7 +116,7 @@ public:
 	std::vector<QueueEntry> next; //types of things we are currently trying to build
 	bool onIbo = true;
 	
-	void onStart(char* iboPath);
+	void onStart();
     void onFrame();
 
 	void addEntryNow(int count, BWAPI::UnitType type);

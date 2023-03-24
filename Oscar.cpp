@@ -1,9 +1,3 @@
-#ifndef WIN32 //if compiling not on windows
-#include <unistd.h>
-#else
-#include <direct.h>
-#endif
-
 #include <cstring>
 #include "Oscar.h"
 #include "Tools.h"
@@ -42,17 +36,7 @@ void Oscar::onStart()
 
     bq.gs = &gs;
 
-    //load ibo (TODO make path relative; load multiple ibos etc)
-    char path[512];
-    #ifndef WIN32
-    getcwd(path, 400);
-    #else
-    _getcwd(path, 200);
-    #endif
-    strncat(path,"/bwapi-data/read/gateway_fe_pvz", 111);
-    fprintf(stderr,"IBO path is %s\n", path);
-
-    bq.onStart(path);
+    bq.onStart();
 
 }
 
