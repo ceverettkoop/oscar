@@ -103,6 +103,7 @@ private:
 	void entryToFront(BWAPI::UnitType type);
 
 	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
+	std::string getIboPath();
 
 public:
 

@@ -35,5 +35,5 @@ clean:
 
 install:
 	cp ./mybot.so /home/sean/development/bwapi/build/bin/bwapi-data/AI/mybot.so
-	cp ./read/* /home/sean/development/bwapi/build/bin/bwapi-data/read/
-	cp ./write/* /home/sean/development/bwapi/build/bin/bwapi-data/write/
+	cp -r ./read/* /home/sean/development/bwapi/build/bin/bwapi-data/read/
+	cp -r ./write/* /home/sean/development/bwapi/build/bin/bwapi-data/write/

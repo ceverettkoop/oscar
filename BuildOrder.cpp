@@ -4,6 +4,7 @@
 #include "OscarMap.h"
 #include <fstream>
 #include "Tools.h"
+#include <cstring>
 
 //first all BQ functions; then IBO (should be folded in later); then tracker
 
