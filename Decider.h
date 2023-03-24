@@ -1,7 +1,6 @@
 #pragma once
 #include <BWAPI.h>
-
-class GameState;
+#include "GameState.h"
 
 class Decider{
 
@@ -20,5 +19,7 @@ private:
     void updateOwnedBases();
     void assignCombatGroup(BWAPI::Unit unit);
     void setRoles();
+    void followInstructions();
+    bool doInstruction(Instruction inst);
 
 };

@@ -13,7 +13,6 @@
 #include <cstring>
 
 //first all BQ functions; then IBO (should be folded in later); then tracker
-//foo
 //Load ibo from file, choose based on race and opponent
 void BuildQueue::onStart(){
     
@@ -87,43 +86,12 @@ void BuildQueue::onFrame(){
     //iterate through every item in queue
     for (int i = 0; i < next.size(); i++){
         
-        BWAPI::UnitType nextUnit = next[i].type;
-    
-        int countToBuild = updateQty(i); //check how many to build
-        if (countToBuild < 1 ) continue;
-    
-        //checks for gas min and supply against what we have as well as what we have already set aside
-        bool canAfford = ( nextUnit.mineralPrice() <= (BWAPI::Broodwar->self()->minerals() - minCommited) && 
-            nextUnit.gasPrice() <= (BWAPI::Broodwar->self()->minerals() - gasCommited) &&
-            nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed() - supplyCommited)  );
-
-        if(canAfford){
-            if(nextUnit.isBuilding()){
-                bool built = false;
-                for (int n = 0; n < countToBuild; ++n){
-                    BWAPI::Unit foundBuilder;
-                    built = BuildBuilding(nextUnit, &foundBuilder, determineLocation(nextUnit));
-                    if(built){
-                        next[i].countBuiltNow++; //tell queue we did it
-                        track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
-                        //set aside money
-                        minCommited += nextUnit.mineralPrice();
-                        gasCommited += nextUnit.gasPrice();
-                        supplyCommited += nextUnit.supplyRequired(); 
-                    }
-                    
-                }
-            }else{
-                for (int n = 0; n < countToBuild; ++n){
-                    if(TrainUnit(nextUnit) == QUEUED) next[i].countBuiltNow++;
-                //should not need to set aside money here because it's either spent or it's not
-                }
-            }
+        if(next[i].isUpgrade){
+            handleUpgradeEntry(next[i], i);
+        }else{
+            handleUnitEntry(next[i], i);
         }
 
-        //somehow i think putting this after the build commands helps idk
-        //adds prereqs to queue if we have need
-        if (!onIbo) queueNextPrereq(nextUnit);
     }
 
     //tracker updates
@@ -133,6 +101,54 @@ void BuildQueue::onFrame(){
     return;
     
 }
+
+void BuildQueue::handleUnitEntry(QueueEntry& entry, int index){
+
+    BWAPI::UnitType nextUnit = entry.type;
+
+    int countToBuild = updateQty(index); //check how many to build
+    if (countToBuild < 1 ) return;
+
+    //checks for gas min and supply against what we have as well as what we have already set aside
+    bool canAfford = ( nextUnit.mineralPrice() <= (BWAPI::Broodwar->self()->minerals() - minCommited) && 
+        nextUnit.gasPrice() <= (BWAPI::Broodwar->self()->minerals() - gasCommited) &&
+        nextUnit.supplyRequired() <= (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed() - supplyCommited)  );
+
+    if(canAfford){
+        if(nextUnit.isBuilding()){
+            bool built = false;
+            for (int n = 0; n < countToBuild; ++n){
+                BWAPI::Unit foundBuilder;
+                built = BuildBuilding(nextUnit, &foundBuilder, determineLocation(nextUnit));
+                if(built){
+                    next[index].countBuiltNow++; //tell queue we did it
+                    track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
+                    //set aside money
+                    minCommited += nextUnit.mineralPrice();
+                    gasCommited += nextUnit.gasPrice();
+                    supplyCommited += nextUnit.supplyRequired(); 
+                }
+                
+            }
+        }else{
+            for (int n = 0; n < countToBuild; ++n){
+                if(TrainUnit(nextUnit) == QUEUED) next[index].countBuiltNow++;
+            //should not need to set aside money here because it's either spent or it's not
+            }
+        }
+    }
+
+    //somehow i think putting this after the build commands helps idk
+    //adds prereqs to queue if we have need
+    if (!onIbo) queueNextPrereq(nextUnit);
+
+}
+
+void BuildQueue::handleUpgradeEntry(QueueEntry& entry, int index){
+
+
+}
+
 
 //THIS IS CURRENTLY WHERE ALL STRATEGY IS INLINED BEYOND IBO
 
@@ -205,14 +221,18 @@ void BuildQueue::addEntryNow(int count, BWAPI::UnitType type){
 }
 
 
-//handing queue entry for upgrades; caller should check if we have researched it or not already before calling
-void BuildQueue::addEntryTotal(int count, BWAPI::UpgradeType type){
+//handing queue entry for upgrades
+void BuildQueue::addEntryTotal(int count, BWAPI::UpgradeType type, int upgradeLevel){
     
+    //if we already have it do nothing
+    if(BWAPI::Broodwar->self()->getUpgradeLevel(type) >= upgradeLevel) return;
+    
+    //now check if it's in queue and just modify level if so
     bool typeExists = false;
 
-    //if upgrade type already in queue nothing to do
     for (int i = 0; i < next.size() && !typeExists; ++i){
         if (type == next[i].upType){
+            next[i].upgradeLevel = upgradeLevel;
             return;
         }     
     }
@@ -221,7 +241,7 @@ void BuildQueue::addEntryTotal(int count, BWAPI::UpgradeType type){
     next.push_back(QueueEntry());
     next.back().upType = type;
     next.back().isUpgrade = true;
-    next.back().countWantedTotal = 1;
+    next.back().upgradeLevel = upgradeLevel;
 
 }
 
@@ -444,8 +464,6 @@ BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
 }
 
 
-
-
 //NOW IBO PARSING
 
 void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
@@ -502,36 +520,73 @@ int InitialBuildOrder::load_ibo(std::string path){
     int i = 0;
     
     if(infile.is_open()){
+        //first loop parses unit type and supply count until #
         while (infile.good()){
+        //parsing unittype and supply count; at # we switch to instructiobs
+            if (inchar == '*') break; //on * skip to instructions
+            if(inchar == '#'){ //on # call it a comment and skip that line
+                getline(infile, instring);
+                instring.clear();
+            } 
             inchar = infile.get();
-            if (inchar == '#') break; //indicates end of ibo at #
             if( inchar != ' ' && inchar != '\n'){
                 instring += inchar;
-            }else{ //end of input
-                //check if last character is a letter
-                if( std::isalpha(*(instring.rbegin())) ){
-                    //const std::string par = instring;
-                    passInstruction(instring); //tell gamestate to do something
+            }else{ //on newline or space parse int
+                inint = std::stoi(instring, NULL);
+                if(isCount){
+                    ibo_supplyCount.push_back(inint);
+                    isCount = false;
                     instring.clear();
-
-                }else{ //handling ibo instructions
-                    inint = std::stoi(instring, NULL);
-
-                    if(isCount){
-                        ibo_supplyCount.push_back(inint);
-                        isCount = false;
-                        instring.clear();
-                    }else{
-                        ibo_unitType.push_back(BWAPI::UnitType(inint));
-                        isCount = true;
-                        i++;
-                        instring.clear();
-                    }
-
+                }else{
+                    ibo_unitType.push_back(BWAPI::UnitType(inint));
+                    isCount = true;
+                    i++;
+                    instring.clear();
                 }
             }
         }
-        
+
+        //second loop to store instructions after int based ibo
+        //* makes instruction start
+        //# makes comment; $makes timestamp; other int is supplyCount; other alpha is instruction
+        while (infile.good()){
+            //assuming we have one instruction at least
+            if(bq->gs->instructions.size() == 0) bq->gs->instructions.push_back(InstructionEntry());
+            //advance line on hashmark or *; this should also allow addl comments
+            if(inchar == '*' || inchar == '#'){
+                getline(infile, instring);
+                instring.clear();
+            } 
+            inchar = infile.get();
+            if( inchar != ' ' && inchar != '\n'){
+                instring += inchar; //add until space or newline
+            
+            //now handling strings
+
+            //if starts with $ store a timestamp
+            }else if(*(instring.begin()) == '$' ){
+                inint = std::stoi(instring, NULL);
+                (*bq->gs->instructions.rbegin()).time = inint;
+                instring.clear(); 
+            }
+                    
+            //if starts with letter store an instruction and advance
+            else if (std::isalpha(*(instring.begin()))) {
+                (*bq->gs->instructions.rbegin()).inst = parseInstruction(instring);
+                instring.clear(); 
+
+                //advance
+                bq->gs->instructions.push_back(InstructionEntry());
+                
+            //else should be a supply count number
+            }else{
+                inint = std::stoi(instring, NULL);
+                (*bq->gs->instructions.rbegin()).supply = inint;
+                instring.clear(); 
+            }
+
+        }
+
     }else {
         fprintf(stderr, "Failed to load input file\n");
         stepCount = 0;
@@ -544,10 +599,12 @@ int InitialBuildOrder::load_ibo(std::string path){
     for (size_t n = 0; n < ibo_supplyCount.size(); n++){
         ibo_supplyCount[n] = (ibo_supplyCount[n]) * 2;
     }
+
+    for(auto &entry : bq->gs->instructions){
+        entry.supply = (entry.supply * 2);
+    }
     
-
     return i;
-
 }
 
 int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
@@ -567,13 +624,15 @@ int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
 
 }
 
-void InitialBuildOrder::passInstruction(const std::string& instring){
+Instruction InitialBuildOrder::parseInstruction(const std::string& instr){
 
-    if(instring == "SCOUT") bq->gs->instruction = SCOUT;
-    else if (instring == "EXPAND") bq->gs->instruction  = EXPAND;
-    else bq->gs->instruction  = NO_INSTRUCTION;
+    if(instr == "EXPAND_NATURAL") return EXPAND_NATURAL;
+    if(instr == "HATCHERY_MAIN") return HATCHERY_MAIN;
+    if(instr == "LING_SPEED") return LING_SPEED;
+
+    return NO_INSTRUCTION;
+
 }
-
 
 
 //NOW TRACKING (AS RELATES TO BUILDERS ONLY)

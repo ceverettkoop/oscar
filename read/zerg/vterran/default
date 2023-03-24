@@ -1,3 +1,4 @@
+#3 hatch muta zvt
 9 42
 12 131
 12 142
@@ -7,23 +8,21 @@
 16 42
 17 132
 22 149
-#instructions to follow
+*****instructions to follow; this will be parsed throughout the game****
 12 EXPAND_NATURAL
 14 HATCHERY_MAIN
 22 LING_SPEED
-
-
-21-23 - Extractor [4]
-@Next 100 Gas - Zergling Speed
-@100% Lair - Spire [5]
-24 - Overlord
-25..27 - Drones
-28..33 Zerglings
-33 - Expansion or Sunken Colonies to adapt to the Terran builds
-@50% Spire - 3 Overlords
-Save Larvae [6]
-@60% Spire - Send drone to expand to third [7]
-33ish - 9 Mutalisks
-@Next 200 Gas:
-    2 more Mutalisks
-    1 Overlord
+#21-23 - Extractor [4]
+#@Next 100 Gas - Zergling Speed
+#@100% Lair - Spire [5]
+#24 - Overlord
+#25..27 - Drones
+#28..33 Zerglings
+#33 - Expansion or Sunken Colonies to adapt to the Terran builds
+#@50% Spire - 3 Overlords
+#Save Larvae [6]
+#@60% Spire - Send drone to expand to third [7]
+#33ish - 9 Mutalisks
+#@Next 200 Gas:
+#    2 more Mutalisks
+#    1 Overlord

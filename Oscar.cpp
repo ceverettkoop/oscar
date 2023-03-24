@@ -116,11 +116,13 @@ void Oscar::collectGas(int countPerGeyser){
 // Draw some relevent information to the screen to help us debug the bot
 void Oscar::drawDebugInformation(){
 
+    //draw build queue
     char format[1024] = "Current build priority:\n";
     char qty[16] = "";
     for(int i = 0; i < bq.next.size(); i++){
         snprintf(qty, 15, " x %d\n", bq.next[i].buildQty);
-        strncat(format, bq.next[i].type.getName().c_str(), 63); 
+        bq.next[i].isUpgrade ? strncat(format, bq.next[i].upType.getName().c_str(), 63) :
+            strncat(format, bq.next[i].type.getName().c_str(), 63);
         strcat(format, qty);
         if (strlen(format) > 943) break; //overflow protection
     }

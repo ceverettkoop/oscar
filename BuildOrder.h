@@ -50,9 +50,8 @@ private:
 	std::vector<int> ibo_supplyCount; //requisite count to build unit or struct at i
 	std::vector<BWAPI::UnitType> ibo_unitType; //type of unit to build
 
-	//after unit commands are parsed; paired set of directives loaded
-	std::vector<std::pair<int, IboInstruction>> ibo_instructions;
-	
+	Instruction parseInstruction(const std::string& instr);
+
 public:
 	
     BuildQueue* bq;
@@ -65,7 +64,6 @@ public:
 	//functions
 	void nextStep(int dblSupplyCount, int* targetCount);
 	int DesiredCountAlreadyBuilt(BWAPI::UnitType type);
-	void passInstruction(const std::string& instring);
 	
 };
 
@@ -82,6 +80,7 @@ public:
 	int countWantedTotal = -1; //-1 means not tracking
 	int countBuiltTotal = 0; //retrieve periodically
 	int buildQty = 0;
+	int upgradeLevel = 0;
 
 	QueueEntry(){};
 	
@@ -112,6 +111,9 @@ private:
 	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
 	std::string getIboPath();
 
+	void handleUnitEntry(QueueEntry& entry, int index);
+	void handleUpgradeEntry(QueueEntry& entry, int index);
+
 public:
 
 	GameState *gs;
@@ -129,7 +131,7 @@ public:
 	void addEntryNow(int count, BWAPI::UnitType type);
 	void replaceEntryNow(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UnitType type);
-	void addEntryTotal(int count, BWAPI::UpgradeType type);
+	void addEntryTotal(int count, BWAPI::UpgradeType type, int upgradeLevel);
 
 	//todo more clever prioritization functions
 	//note bool BWAPI::PlayerInterface::isUnitAvailable (UnitType unit) const will tell if can build

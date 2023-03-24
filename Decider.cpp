@@ -1,7 +1,7 @@
 #include "Decider.h"
 #include "OscarMap.h"
-#include "GameState.h"
 #include "Tools.h"
+#include "BuildOrder.h"
 #include <map>
 
 
@@ -20,6 +20,9 @@ void Decider::onFrame(){
 
     //update group roles
     setRoles();
+
+    //check if we have an instruction
+    followInstructions();
 
     //placeholder expansion logic
     //if over 20 workers and nexus not already in the queue flip it on
@@ -201,4 +204,64 @@ void Decider::setRoles(){
         }
     }
 
+}
+
+void Decider::followInstructions(){
+
+    int removeIndex = -1;
+    bool checking = true;
+
+    //check each instruction and execute; if it returns true delete it and rerun the loop
+    while(checking){
+        checking = false;
+        for (int i = 0; i < gs->instructions.size(); ++i ){
+            auto& entry = gs->instructions[i];
+
+            //check against supply if nonzero
+            if(entry.supply){
+                if (BWAPI::Broodwar->self()->supplyTotal() > entry.supply){
+                    //if we successfully do it remove it
+                    if(doInstruction(entry.inst)){
+                        removeIndex = i;
+                        checking = true;
+                        break;
+                    }
+                
+                }
+
+            }else{ //check against timestamp
+                if(entry.time > BWAPI::Broodwar->elapsedTime() ){
+                    //if we successfully do it remove it
+                    if(doInstruction(entry.inst)){
+                        removeIndex = i;
+                        checking = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+
+//handle every instruction command and return true if successful
+bool Decider::doInstruction(Instruction inst ){
+
+    if(inst == LING_SPEED){
+        gs->bq->addEntryTotal(1, BWAPI::UpgradeTypes::Metabolic_Boost, 1);
+        return true;
+    }
+
+    if(inst == NO_INSTRUCTION){
+        return true; //should trigger blank instruction getting deleted
+    }
+
+    if(inst == EXPAND_NATURAL){
+        
+        return true;
+    }
+
+    fprintf(stderr, "Invalid instruction \n");
+    return false;
 }

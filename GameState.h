@@ -5,6 +5,7 @@
 #include <map>
 
 class OscarMap;
+class BuildQueue;
 
 enum GroupRole{
     ATTACK,
@@ -12,12 +13,18 @@ enum GroupRole{
     HARASS
 };
 
-enum IboInstruction{
-    NO_INSTRUCTION,
-    SCOUT,
-    EXPAND
+enum Instruction{
+    EXPAND_NATURAL,
+    HATCHERY_MAIN,
+    LING_SPEED,
+    NO_INSTRUCTION
 };
 
+struct InstructionEntry{
+    Instruction inst = NO_INSTRUCTION;
+    int supply = 0;
+    int time = 0;
+};
 
 struct BaseEconomy{
 
@@ -47,11 +54,10 @@ public:
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand
     int activeBaseCount = 0;
     OscarMap* mapPtr = nullptr;
+    BuildQueue* bq = nullptr;
     std::map<int, BaseEconomy> ownedBases;
     std::map<int, CombatGroup> combatGroups;
-    IboInstruction instruction = NO_INSTRUCTION;
-
-    void passInstruction(const std::string& instring);
+    std::vector<InstructionEntry> instructions;
 
 };
 
