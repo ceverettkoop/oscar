@@ -1,17 +1,81 @@
 //Really manages everything to do with building buildings or training units
+#ifndef WIN32 //if compiling not on windows
+#include <unistd.h>
+#else
+#include <direct.h>
+#endif
+
+#include <fstream>
 
 #include "BuildOrder.h"
 #include "OscarMap.h"
-#include <fstream>
 #include "Tools.h"
 #include <cstring>
 
 //first all BQ functions; then IBO (should be folded in later); then tracker
-
-void BuildQueue::onStart(char* iboPath){
+//foo
+//Load ibo from file, choose based on race and opponent
+void BuildQueue::onStart(){
+    
     ibo.bq = this;
-    ibo.load_ibo(iboPath);
+    ibo.load_ibo(getIboPath());
     track.bq = this;
+}
+
+std::string BuildQueue::getIboPath(){
+
+    char path[1028];
+    
+    //get current working directory
+    #ifndef WIN32
+    getcwd(path, 400);
+    #else
+    _getcwd(path, 200);
+    #endif
+
+    //append read directory
+    strcat(path,"/bwapi-data/read");
+
+    //append own race
+    switch (BWAPI::Broodwar->self()->getRace()){
+    case BWAPI::Races::Zerg :
+        strcat(path, "/zerg");
+        break;
+
+    case BWAPI::Races::Protoss :
+        strcat(path, "/protoss");
+        break;
+
+    case BWAPI::Races::Terran :
+        strcat(path, "/terran");
+        break;
+    }
+
+    //append enemy race
+    switch (BWAPI::Broodwar->enemy()->getRace()){
+    case BWAPI::Races::Zerg :
+        strcat(path, "/vzerg");
+        break;
+
+    case BWAPI::Races::Protoss :
+        strcat(path, "/vprotoss");
+        break;
+
+    case BWAPI::Races::Terran :
+        strcat(path, "/vterran");
+        break;
+
+    }
+
+    //TODO PICK IBOS FROM ALL IN DIRECTORY
+    //FOR NOW WE ARE JUST PICKING ONE LABELED DEFAULT
+    strcat(path, "/default");
+
+    fprintf(stderr,"IBO path is %s\n", path);
+
+    std::string spath = path;
+    return spath;
+
 }
 
 
@@ -331,14 +395,14 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, 
 
 BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
 
-    //GETTING SOURCE BUILDING IGNORING ARCHONS for now
+    //GETTING SOURCE BUILDING/UNIT IGNORING ARCHONS for now
     BWAPI::UnitType trainerType = type.whatBuilds().first;
     BWAPI::Unitset trainerSet;
 
     // For each unit that we own
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
         // if the unit is of the correct type and it actually has been constructed, add it to set
-        if (unit->getType() == trainerType && unit->isCompleted()){
+        if (unit->getType() == trainerType && unit->isCompleted() && !unit->isMorphing()){
             trainerSet.insert(unit);
         }
     }
@@ -359,7 +423,6 @@ BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
 
 
 //NOW IBO PARSING
-
 
 void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 
@@ -405,7 +468,7 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 //take a file of integers seperated by space or newline of the format:
 //supplycount unittype \n supplycount unittype etc etc
 //returns -1 on failure otherwise returns # of steps found in build order
-int InitialBuildOrder::load_ibo(char* path){
+int InitialBuildOrder::load_ibo(std::string path){
 
     std::ifstream infile (path);
     std::string instring;
