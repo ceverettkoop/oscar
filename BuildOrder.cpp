@@ -423,7 +423,6 @@ BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
 
 //NOW IBO PARSING
 
-
 void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
 
     int supplyCount = dblSupplyCount; //ibo was doubled already whoops
