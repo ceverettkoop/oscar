@@ -146,6 +146,28 @@ void BuildQueue::handleUnitEntry(QueueEntry& entry, int index){
 
 void BuildQueue::handleUpgradeEntry(QueueEntry& entry, int index){
 
+    BWAPI::UpgradeType upgrade = entry.upType;
+    bool success = false;
+
+    //checks for gas min and supply against what we have as well as what we have already set aside
+    bool canAfford = ( upgrade.mineralPrice() <= (BWAPI::Broodwar->self()->minerals() - minCommited) && 
+        upgrade.gasPrice() <= (BWAPI::Broodwar->self()->minerals() - gasCommited));
+
+    if(canAfford){
+
+        BWAPI::UnitType rType= upgrade.whatUpgrades();
+        BWAPI::Unitset researchers = Tools::GetUnitSetofType(rType);
+
+        for(auto unit : researchers){
+            if(!unit->isResearching()){
+                success = unit->upgrade(upgrade);
+                if(success) break;
+            }
+        }
+
+        if(success) rmEntry(upgrade, entry.upgradeLevel);
+
+    }
 
 }
 
@@ -338,6 +360,21 @@ void BuildQueue::rmEntry(BWAPI::UnitType type){
     if(typeExists) next.erase(next.begin() + index);
 
 }
+
+void BuildQueue::rmEntry(BWAPI::UpgradeType type, int level){
+
+    bool typeExists = false;
+    int index = -1;
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].upType && next[i].upgradeLevel == level) typeExists = true;
+        index = i;
+    }
+
+    if(typeExists) next.erase(next.begin() + index);
+
+
+}
+
 
 //send queue entry of specified type to front of the list
 void BuildQueue::entryToFront(BWAPI::UnitType type){

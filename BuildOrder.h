@@ -106,6 +106,7 @@ private:
 
 	int updateQty(int index);
 	void rmEntry(BWAPI::UnitType type);
+	void rmEntry(BWAPI::UpgradeType type, int level);
 	void entryToFront(BWAPI::UnitType type);
 
 	BWAPI::UnitType queueNextPrereq(BWAPI::UnitType type);
