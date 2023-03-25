@@ -88,8 +88,8 @@ void MacroManager::assignWorkers(){
 
     //every frame tell every worker to work per gamestate assignments
     //gamestate will update on worker, nexus or refinery creation or destruction
-    //logic for worker to flee enemy or fight etc handled in micro which procs after macro and should overwrite this command
-    //scouting etc also procs after
+    //logic for worker to flee enemy or fight etc handled in micro which procs after macro
+    //this should only impact idle workers or workers assigned to mining so in theory microing workers unaffected
 
     BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getWorker();
 
@@ -239,7 +239,7 @@ int MacroManager::countMinersInBase(const BWEM::Base *base){
 
 }
 
-//for speed just counting a miner that is within 14 build tiles of center of base (not ideal)
+//for speed just counting a miner that is within 8 build tiles of center of base (not ideal)
 int MacroManager::countGasCollectorsInBase(const BWEM::Base *base){
 
     int count = 0;

@@ -1,3 +1,5 @@
+//mostly taken from StartCraft example bot by Dave Churchill
+
 #include "Tools.h"
 #include "Oscar.h"
 
