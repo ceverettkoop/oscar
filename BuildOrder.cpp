@@ -122,11 +122,14 @@ void BuildQueue::handleUnitEntry(QueueEntry& entry, int index){
                 built = BuildBuilding(nextUnit, &foundBuilder, determineLocation(nextUnit));
                 if(built){
                     next[index].countBuiltNow++; //tell queue we did it
-                    track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
-                    //set aside money
-                    minCommited += nextUnit.mineralPrice();
-                    gasCommited += nextUnit.gasPrice();
-                    supplyCommited += nextUnit.supplyRequired(); 
+                    //if it was built by a unit go track to make sure it happens
+                    if(!foundBuilder->getType().isBuilding()){
+                        track.trackBuilder(foundBuilder, nextUnit); //follow builder to make sure we actually build it
+                        ///set aside money
+                        minCommited += nextUnit.mineralPrice();
+                        gasCommited += nextUnit.gasPrice();
+                        supplyCommited += nextUnit.supplyRequired(); 
+                    }
                 }
                 
             }
@@ -154,6 +157,7 @@ void BuildQueue::handleUpgradeEntry(QueueEntry& entry, int index){
         upgrade.gasPrice() <= (BWAPI::Broodwar->self()->minerals() - gasCommited));
 
     if(canAfford){
+
 
         BWAPI::UnitType rType= upgrade.whatUpgrades();
         BWAPI::Unitset researchers = Tools::GetUnitSetofType(rType);
@@ -200,8 +204,6 @@ void BuildQueue::updateQueue(){
         //DRONE QUEUE set to workermax
             addEntryTotal(gs->workerMax, worker);
 
-        //build assimilator once off ibo
-        //    addEntryTotal(1, BWAPI::BroodwarPtr->self()->getRace().getRefinery());
 
         //Try to expand if told to
             if(gs->basesDesired > gs->activeBaseCount){
@@ -209,8 +211,6 @@ void BuildQueue::updateQueue(){
                 //reset flag now that it's been queued
             }
 
-        //ZEALOT QUEUE
-            addEntryTotal(10, BWAPI::UnitTypes::Protoss_Zealot);
 
     }
 
@@ -248,11 +248,8 @@ void BuildQueue::addEntryTotal(int count, BWAPI::UpgradeType type, int upgradeLe
     
     //if we already have it do nothing
     if(BWAPI::Broodwar->self()->getUpgradeLevel(type) >= upgradeLevel) return;
-    
-    //now check if it's in queue and just modify level if so
-    bool typeExists = false;
 
-    for (int i = 0; i < next.size() && !typeExists; ++i){
+    for (int i = 0; i < next.size(); ++i){
         if (type == next[i].upType){
             next[i].upgradeLevel = upgradeLevel;
             return;
@@ -453,23 +450,22 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, 
 
     // Get the type of unit that is required to build the desired building
     BWAPI::UnitType builderType = type.whatBuilds().first;
-    // Get a unit that we own that is of the given type so it can build
-    // If we can't find a valid builder unit, then we have to cancel the building
     BWAPI::Unit builder = Tools::GetBuilder(builderType);
     if (!builder) { return false; }
+    *foundBuilder = builder;
 
     // Desired location is argument now
+    //if we are morphing do that now
+    if(builderType.isBuilding()){
+        return builder->morph(type);
+    }
 
     // Ask BWAPI for a building location near the desired position for the type
     int maxBuildRange = 64;
     bool buildingOnCreep = type.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
     
-    bool success = builder->build(type, buildPos);
-
-    *foundBuilder = builder;
-
-    return success;
+    return builder->build(type, buildPos);
 }
 
 BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
@@ -557,7 +553,7 @@ int InitialBuildOrder::load_ibo(std::string path){
     int i = 0;
     
     if(infile.is_open()){
-        //first loop parses unit type and supply count until #
+        //first loop parses unit type and supply count until *
         while (infile.good()){
         //parsing unittype and supply count; at # we switch to instructiobs
             if (inchar == '*') break; //on * skip to instructions

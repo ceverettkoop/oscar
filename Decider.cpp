@@ -26,9 +26,9 @@ void Decider::onFrame(){
 
     //placeholder expansion logic
     //if over 20 workers and nexus not already in the queue flip it on
-    if(gs->workerCount > 12){
-        gs->basesDesired = 2;
-    }
+    //if(gs->workerCount > 12){
+    //    gs->basesDesired = 2;
+    //}
 
 }
 
@@ -44,10 +44,32 @@ void Decider::onUnitComplete(BWAPI::Unit unit){
         calculateWorkers();
     }
 
-    //if it's not a worker or a building; assign it a combat group
-    if(!unit->getType().isWorker() && !unit->getType().isBuilding()){
+    //if it's not a worker or building or larva or egg; assign it a combat group
+    if(!unit->getType().isWorker() && !unit->getType().isBuilding() && (!unit->getType() != BWAPI::UnitTypes::Zerg_Larva)
+        && (!unit->getType() != BWAPI::UnitTypes::Zerg_Egg) ){
         assignCombatGroup(unit);
     }
+
+}
+
+void Decider::onUnitMorph(BWAPI::Unit unit) {
+
+    //if it's a nexus also update our count of what bases are ours
+    if(unit->getType().isResourceDepot()){ 
+        updateOwnedBases();
+    }
+
+    //we're only going to recalculate worker assignments if it's a nexus or a worker OR refinery
+    if(unit->getType().isWorker() ||  unit->getType().isResourceDepot() || unit->getType().isRefinery()){
+        calculateWorkers();
+    }
+
+    //if it's not a worker or a building or egg; assign it a combat group
+    //assign function should leave it alone if already in a group
+    if(!unit->getType().isWorker() && !unit->getType().isBuilding() && (!unit->getType() != BWAPI::UnitTypes::Zerg_Egg) ){
+        assignCombatGroup(unit);
+    }
+
 
 }
 
@@ -162,15 +184,17 @@ void Decider::updateOwnedBases(){
                 gs->ownedBases.insert({key, newBase});
             }
         }
-
+        int deleteKey = -1;
         if (!owned){
              //finally if we don't own this base; check if its in our owned BaseTracker and if it is delete the entry
+             //this will only delete one per call but shouldn't matter
             if (gs->ownedBases.size() == 0) continue; //error check?
             for(auto it = gs->ownedBases.begin(); it != gs->ownedBases.end(); ++it){
                 if (base == it->second.base){
-                    gs->ownedBases.erase(it);
+                    deleteKey = it->first;
                 }
             }
+            if(deleteKey != -1) gs->ownedBases.erase(deleteKey);
         }  
     }
 }
@@ -216,6 +240,8 @@ void Decider::followInstructions(){
         checking = false;
         for (int i = 0; i < gs->instructions.size(); ++i ){
             auto& entry = gs->instructions[i];
+            if(removeIndex != -1) gs->instructions.erase(gs->instructions.begin() + i);
+            removeIndex = -1;
 
             //check against supply if nonzero
             if(entry.supply){
@@ -259,6 +285,10 @@ bool Decider::doInstruction(Instruction inst ){
 
     if(inst == EXPAND_NATURAL){
         
+        return true;
+    }
+
+    if(inst == HATCHERY_MAIN){
         return true;
     }
 

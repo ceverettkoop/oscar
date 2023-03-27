@@ -6,23 +6,32 @@
 13 149
 14 37
 16 42
+#lair
 17 132
 22 149
+#spire
+23 141
+24 42
+#all lings below
+28 37
+30 37
+32 37
+33 37
+#33 - Expansion or Sunken Colonies to adapt to the Terran builds -omitted rn
+33 42
+33 42
+33 42
+#Save Larvae [6]
+35 43
+35 43
+35 43
+35 43
+35 43
+35 43
+35 43
+35 43
+35 43
 *****instructions to follow; this will be parsed throughout the game****
 12 EXPAND_NATURAL
 14 HATCHERY_MAIN
 22 LING_SPEED
-#21-23 - Extractor [4]
-#@Next 100 Gas - Zergling Speed
-#@100% Lair - Spire [5]
-#24 - Overlord
-#25..27 - Drones
-#28..33 Zerglings
-#33 - Expansion or Sunken Colonies to adapt to the Terran builds
-#@50% Spire - 3 Overlords
-#Save Larvae [6]
-#@60% Spire - Send drone to expand to third [7]
-#33ish - 9 Mutalisks
-#@Next 200 Gas:
-#    2 more Mutalisks
-#    1 Overlord

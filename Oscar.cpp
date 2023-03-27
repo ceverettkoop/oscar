@@ -38,6 +38,8 @@ void Oscar::onStart()
 
     bq.onStart();
 
+    gs.bq = &bq;
+
 }
 
 // Called on each frame of the game
@@ -151,8 +153,9 @@ void Oscar::onUnitDestroy(BWAPI::Unit unit){
 
 // Called whenever a unit is morphed, with a pointer to the unit
 // Zerg units morph when they turn into other units
-void Oscar::onUnitMorph(BWAPI::Unit unit)
-{
+void Oscar::onUnitMorph(BWAPI::Unit unit){
+
+    decider.onUnitMorph(unit);
 	
 }
 

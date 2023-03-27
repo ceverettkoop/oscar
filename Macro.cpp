@@ -111,7 +111,7 @@ void MacroManager::assignWorkers(){
     }
 
     //next loop, assign wokers
-    for(auto it = gs->ownedBases.begin(); it->first != gs->ownedBases.rbegin()->first; ++it){
+    for(auto it = gs->ownedBases.begin(); it != gs->ownedBases.end(); ++it){
         
         auto &p = *it;
         //reset localMiners

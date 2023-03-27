@@ -12,6 +12,7 @@ public:
     void onFrame();
     void onUnitDestroy(BWAPI::Unit unit);
     void onUnitComplete(BWAPI::Unit unit);
+    void onUnitMorph(BWAPI::Unit unit);
 
 private:
     void setScouting();
