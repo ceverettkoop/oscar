@@ -46,9 +46,10 @@ class InitialBuildOrder{
 	//just stores what to build at drone count x
 	
 private:
-	//these two elements are treated as paired
+	//three vectors treated as paired by index
 	std::vector<int> ibo_supplyCount; //requisite count to build unit or struct at i
 	std::vector<BWAPI::UnitType> ibo_unitType; //type of unit to build
+	std::vector<int> countToBuild;
 
 	Instruction parseInstruction(const std::string& instr);
 
@@ -59,13 +60,13 @@ public:
 	int lastStep = -1;
 	int stepCount = 0;
 	bool isFinished = false;
-	int load_ibo(std::string path);
 
 	//functions
 	void nextStep(int dblSupplyCount, int* targetCount);
-	int DesiredCountAlreadyBuilt(BWAPI::UnitType type);
+	int load_ibo(std::string path);
 	
 };
+
 
 
 class QueueEntry{
@@ -133,6 +134,7 @@ public:
 	void replaceEntryNow(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UnitType type);
 	void addEntryTotal(int count, BWAPI::UpgradeType type, int upgradeLevel);
+	void incrementEntryTotal(int count, BWAPI::UnitType type);
 
 	//todo more clever prioritization functions
 	//note bool BWAPI::PlayerInterface::isUnitAvailable (UnitType unit) const will tell if can build

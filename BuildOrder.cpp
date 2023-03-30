@@ -210,13 +210,9 @@ void BuildQueue::updateQueue(){
                 addEntryTotal(gs->basesDesired , BWAPI::BroodwarPtr->self()->getRace().getResourceDepot());
                 //reset flag now that it's been queued
             }
-
-
     }
-
     
 }
-
 
 
 //adds to now queue; other function replaces it
@@ -278,12 +274,37 @@ void BuildQueue::addEntryTotal(int count, BWAPI::UnitType type){
         }     
     }    
 
+    //else add it
     if(!typeExists){
         next.push_back(QueueEntry());
         next.back().type = type;
         next.back().countWantedTotal = count;
         next.back().countBuiltTotal = Tools::CountUnitsOfType(type, BWAPI::Broodwar->self()->getUnits() ); //init
     }    
+}
+
+void BuildQueue::incrementEntryTotal(int count, BWAPI::UnitType type){
+
+   bool typeExists = false;
+    
+    //if type already in queue AUGMENT count wanted and reset built
+    for (int i = 0; i < next.size() && !typeExists; ++i){
+        if (type == next[i].type){
+            typeExists = true; 
+            next[i].countWantedTotal = next[i].countWantedTotal + count;
+            next[i].countBuiltTotal=  Tools::CountUnitsOfType(type, BWAPI::Broodwar->self()->getUnits() );           
+        }     
+    }    
+
+    //else add it
+    if(!typeExists){
+        next.push_back(QueueEntry());
+        next.back().type = type;
+        next.back().countWantedTotal = count;
+        next.back().countBuiltTotal = Tools::CountUnitsOfType(type, BWAPI::Broodwar->self()->getUnits() ); //init
+    }    
+
+
 }
 
 int BuildQueue::updateQty(int index){
@@ -389,10 +410,21 @@ void BuildQueue::entryToFront(BWAPI::UnitType type){
 
 BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type){
 
+    //gs should tell us which base to build this building at
     if(type == BWAPI::BroodwarPtr->self()->getRace().getResourceDepot()){
+        if(gs->hatcheryMain) return BWAPI::Broodwar->self()->getStartLocation();
         return gs->mapPtr->findNextExpansion(gs)->Location();
 
-    }else return BWAPI::Broodwar->self()->getStartLocation();
+    //this will return first owned base that has less refineries than geysers
+    }else if (type == BWAPI::BroodwarPtr->self()->getRace().getRefinery()){
+        for(auto &baseEcon : gs->ownedBases){
+            if(baseEcon.second.assimilatorCount < baseEcon.second.base->Geysers().size()){
+                return baseEcon.second.base->Location();
+            }
+        }
+    }
+    
+    return BWAPI::Broodwar->self()->getStartLocation();
 
 }
 
@@ -508,12 +540,7 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
     BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
-    /*//cut drones if next one will eff pylon
-    if(ibo_unitType[curStep+1] == pylon && ( (supplyCount + 2) >= ibo_supplyCount[curStep+1] ) ){
-        if( BWAPI::Broodwar->self()->minerals() < 150)  droning = false;
-    }*/
-
-    //always have queued one drone
+    //always have queued one drone unless we cut drones
     if(droning){ 
         bool droneQueued = false;
         for (auto& entry : bq->next){
@@ -531,7 +558,7 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
             curStep = i;
             if (lastStep < curStep){ //if new step 
                 bq->addEntryNow(1, ibo_unitType[i]); //queue one up
-                if (supplyCount >= ibo_supplyCount.back()) isFinished = true;
+                if ((curStep + 1) == ibo_supplyCount.size()) isFinished = true;
                 *targetCount = ibo_supplyCount[i];
                 lastStep = curStep; //reset step check
                 return;
@@ -580,6 +607,7 @@ int InitialBuildOrder::load_ibo(std::string path){
         }
 
         //second loop to store instructions after int based ibo
+        //instructions are fed to gs
         //* makes instruction start
         //# makes comment; $makes timestamp; other int is supplyCount; other alpha is instruction
         while (infile.good()){
@@ -595,9 +623,9 @@ int InitialBuildOrder::load_ibo(std::string path){
                 instring += inchar; //add until space or newline
             
             //now handling strings
-
             //if starts with $ store a timestamp
             }else if(*(instring.begin()) == '$' ){
+                instring.erase(instring.begin());
                 inint = std::stoi(instring, NULL);
                 (*bq->gs->instructions.rbegin()).time = inint;
                 instring.clear(); 
@@ -640,22 +668,6 @@ int InitialBuildOrder::load_ibo(std::string path){
     return i;
 }
 
-int InitialBuildOrder::DesiredCountAlreadyBuilt(BWAPI::UnitType type){
-    int currentStep = 0;
-    int countDesired = 0;
-    for(int i = 0; i < ibo_supplyCount.size(); i++){
-        if(ibo_supplyCount[i] <=  BWAPI::Broodwar->self()->supplyUsed())
-            currentStep = i;
-    }
-
-    for(int i = 0; i <= currentStep; i++){
-        if(ibo_unitType[i] == type)
-            countDesired++;
-    }
-
-    return countDesired;
-
-}
 
 Instruction InitialBuildOrder::parseInstruction(const std::string& instr){
 
@@ -714,20 +726,31 @@ int Tracker::trackBuilder(BWAPI::Unit unit, BWAPI::UnitType buildType){
 //if success builder is auto removed from tracking
 CommandResult Tracker::didBuilderSucceed(int key, Builder found){
 
-    //assuming as soon as it's done building it will be issued a new command
-
-    //BWAPI::UnitCommand command = found.unit->getLastCommand();
-
-    //If buildtype does not matches unit is no longer on the way
-    if(found.unit->getBuildType() != found.buildType){
-        //now count to see if he built it
-        int newCount = Tools::CountUnitsOfType(found.buildType,BWAPI::Broodwar->self()->getUnits());
-        if (newCount <= found.initBuildCount){ 
-            return FAIL_AND_RETRY;
+    //if we are zerg this is simpler?
+    if(BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Zerg){
+        if(found.unit->getType() == found.buildType){
+            return SUCCESS;
         }else{
-            return SUCCESS;}
+            if (found.unit->getBuildType() != found.buildType){
+                return FAIL_AND_RETRY;
+            }else{
+                return ONGOING;
+            }
+        }
+
     }else{
-        return ONGOING;
+        //for non zergs
+        //If buildtype does not matches unit is no longer on the way
+        if(found.unit->getBuildType() != found.buildType){
+            //now count to see if he built it
+            int newCount = Tools::CountUnitsOfType(found.buildType,BWAPI::Broodwar->self()->getUnits());
+            if (newCount <= found.initBuildCount){ 
+                return FAIL_AND_RETRY;
+            }else{
+                return SUCCESS;}
+        }else{
+            return ONGOING;
+        }
     }
 
 }

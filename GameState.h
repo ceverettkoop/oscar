@@ -50,6 +50,8 @@ class GameState{
 public:
     int basesDesired = 1;
     bool isScouting = false;
+    bool hatcheryMain = false;
+    
     int workerCount = 0;
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand
     int activeBaseCount = 0;

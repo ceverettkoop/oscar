@@ -92,7 +92,7 @@ void Decider::onUnitDestroy(BWAPI::Unit unit){
 //will be made more complicated
 void Decider::setScouting(){
 
-    const int scoutStart = 18;
+    const int scoutStart = 20;
 
     if(gs->mapPtr->enemyMain == nullptr){
             if(BWAPI::Broodwar->self()->supplyUsed() > scoutStart){
@@ -256,7 +256,7 @@ void Decider::followInstructions(){
                 }
 
             }else{ //check against timestamp
-                if(entry.time > BWAPI::Broodwar->elapsedTime() ){
+                if( (entry.time * 24) < BWAPI::Broodwar->getFrameCount()){
                     //if we successfully do it remove it
                     if(doInstruction(entry.inst)){
                         removeIndex = i;
@@ -284,11 +284,14 @@ bool Decider::doInstruction(Instruction inst ){
     }
 
     if(inst == EXPAND_NATURAL){
-        
+        gs->hatcheryMain = false;
+        gs->bq->addEntryNow(1, BWAPI::Broodwar->self()->getRace().getResourceDepot());
         return true;
     }
 
     if(inst == HATCHERY_MAIN){
+        gs->hatcheryMain = true;
+        gs->bq->addEntryNow(1, BWAPI::Broodwar->self()->getRace().getResourceDepot());
         return true;
     }
 

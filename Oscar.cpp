@@ -52,6 +52,7 @@ void Oscar::onFrame()
     map.onFrame();
 
     //Make decisions; interacts with gamestate
+    //wait a few frames to avoid weirdness
     decider.onFrame();
 
     //Assign builders to build things and queue units
@@ -128,9 +129,9 @@ void Oscar::drawDebugInformation(){
         strcat(format, qty);
         if (strlen(format) > 943) break; //overflow protection
     }
-    BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n%s\n"
+    BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n%s\nApprox seconds: %d\n"
     , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), ( BWAPI::Broodwar->self()->supplyUsed() / 2), 
-    (BWAPI::Broodwar->self()->supplyTotal() / 2), format );
+    (BWAPI::Broodwar->self()->supplyTotal() / 2), format, (BWAPI::Broodwar->getFrameCount() / 24) );
 
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
