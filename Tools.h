@@ -11,7 +11,7 @@ namespace Tools
 
     BWAPI::Unit GetUnitOfType(BWAPI::UnitType type);
     BWAPI::Unitset GetUnitSetofType(BWAPI::UnitType type);
-    BWAPI::Unit GetBuilder(BWAPI::UnitType type);
+    BWAPI::Unit GetBuilder(BWAPI::UnitType type, BWAPI::TilePosition desiredPos);
     BWAPI::Unit GetDepot();
 
     void DrawUnitBoundingBoxes();

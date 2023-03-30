@@ -3,14 +3,14 @@
 #12 131
 12 142
 #14 131
-15 149
+13 149
 14 37
-16 42
+15 42
 #lair
 17 132
-22 149
 #spire
 23 141
+23 149
 24 42
 #all lings below
 28 37
@@ -32,6 +32,8 @@
 35 43
 35 43
 *****instructions to follow; this will be parsed throughout the game****
-$20 EXPAND_NATURAL
-14 HATCHERY_MAIN
+$90 STOP_DRONING
+$100 EXPAND_NATURAL
+$120 START_DRONING
+$180 HATCHERY_MAIN
 22 LING_SPEED

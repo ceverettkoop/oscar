@@ -66,14 +66,22 @@ BWAPI::Unitset Tools::GetUnitSetofType(BWAPI::UnitType type){
     return returnSet;
 }
 
-BWAPI::Unit Tools::GetBuilder(BWAPI::UnitType type){
+BWAPI::Unit Tools::GetBuilder(BWAPI::UnitType type, BWAPI::TilePosition desiredPos){
     
+    BWAPI::Unitset eligible;
+
     // For each unit that we own
     for (auto& unit : BWAPI::Broodwar->self()->getUnits()){
-        // if the unit is of the correct type, and it actually has been constructed, AND ITS NOT ON THE WAY TO BUILD
-        if (unit->getType() == type && unit->isCompleted()){
-            if(unit->getLastCommand().getType() != BWAPI::UnitCommandTypes::Build) return unit;
+        // if the unit is of the correct type; it is miner or idle; add to eligible set
+        if (unit->getType() == type && unit->isCompleted() && (unit->isIdle() || unit->isGatheringMinerals()) ){
+            eligible.insert(unit);
         }
+    }
+
+    if(eligible.size() > 0){
+        BWAPI::Position pos = (BWAPI::Position)desiredPos;
+        return GetClosestUnitTo(pos, eligible);
+
     }
 
     // If we didn't find a valid unit to return, make sure we return nullptr

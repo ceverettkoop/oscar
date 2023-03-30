@@ -295,6 +295,16 @@ bool Decider::doInstruction(Instruction inst ){
         return true;
     }
 
+    if(inst == STOP_DRONING){
+        gs->droning = false;
+        return true;
+    }
+
+    if(inst == START_DRONING){
+        gs->droning = true;
+        return true;
+    }
+
     fprintf(stderr, "Invalid instruction \n");
     return false;
 }

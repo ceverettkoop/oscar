@@ -17,6 +17,8 @@ enum Instruction{
     EXPAND_NATURAL,
     HATCHERY_MAIN,
     LING_SPEED,
+    STOP_DRONING,
+    START_DRONING,
     NO_INSTRUCTION
 };
 
@@ -44,13 +46,14 @@ struct CombatGroup{
 
 };
 
-
+ 
 class GameState{
     
 public:
     int basesDesired = 1;
     bool isScouting = false;
     bool hatcheryMain = false;
+    bool droning = true;
     
     int workerCount = 0;
     int workerMax = 0; //based on current amount of bases occupied, will change when we expand

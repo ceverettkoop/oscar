@@ -201,8 +201,8 @@ void BuildQueue::updateQueue(){
             replaceEntryNow(1, pylon);
         }
 
-        //DRONE QUEUE set to workermax
-            addEntryTotal(gs->workerMax, worker);
+        //DRONE QUEUE set to workermax if droning
+        if(gs->droning) addEntryTotal(gs->workerMax, worker);
 
 
         //Try to expand if told to
@@ -482,7 +482,7 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, 
 
     // Get the type of unit that is required to build the desired building
     BWAPI::UnitType builderType = type.whatBuilds().first;
-    BWAPI::Unit builder = Tools::GetBuilder(builderType);
+    BWAPI::Unit builder = Tools::GetBuilder(builderType, desiredPos);
     if (!builder) { return false; }
     *foundBuilder = builder;
 
@@ -536,7 +536,7 @@ void InitialBuildOrder::nextStep(int dblSupplyCount, int* targetCount){
     int supplyCount = dblSupplyCount; //ibo was doubled already whoops
         
     //assume constant droning unless we exceed count per gs.. should not happen on ibo
-    bool droning = (bq->gs->workerCount < bq->gs->workerMax);
+    bool droning = bq->gs->droning;
     BWAPI::UnitType worker = BWAPI::Broodwar->self()->getRace().getWorker();
     BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
@@ -674,6 +674,8 @@ Instruction InitialBuildOrder::parseInstruction(const std::string& instr){
     if(instr == "EXPAND_NATURAL") return EXPAND_NATURAL;
     if(instr == "HATCHERY_MAIN") return HATCHERY_MAIN;
     if(instr == "LING_SPEED") return LING_SPEED;
+    if(instr == "STOP_DRONING") return STOP_DRONING;
+    if(instr == "START_DRONING") return START_DRONING;    
 
     return NO_INSTRUCTION;
 
