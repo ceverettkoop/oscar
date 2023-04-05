@@ -4,17 +4,15 @@ Copyright (c) 2023 Sean McBride using MIT License (see below)
 ---
 This project incorporates components from the following projects, every effort has been made to attribute them with comments in the source:
 
-STARTcraft by David Churchill https://github.com/davechurchill/STARTcraft
-BWEM Community by Igor Dimitrijevic https://github.com/N00byEdge/BWEM-community
-BWEB by Christian McCrave https://github.com/Cmccrave/BWEB
-FAP by Hannes Bredberg https://github.com/N00byEdge/FAP
+STARTcraft by David Churchill (MIT license) https://github.com/davechurchill/STARTcraft
+BWEM Community by Igor Dimitrijevic (MIT license) https://github.com/N00byEdge/BWEM-community
+BWEB by Christian McCrave (MIT license) https://github.com/Cmccrave/BWEB
+FAP by Hannes Bredberg (MIT license) https://github.com/N00byEdge/FAP
 
 This project uses the BWAPI API licensed with GPL 3. The license is available here: https://github.com/bwapi/bwapi/blob/main/LICENSE
 
 ---
 MIT License
-
-Copyright (c) 2022 David Churchill
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +31,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-BWAPI license available here:
-
-https://github.com/bwapi/bwapi/blob/main/LICENSE
