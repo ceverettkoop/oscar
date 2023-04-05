@@ -274,3 +274,4 @@ int Tools::BuildingHowMany(BWAPI::UnitType type){
     return qty;
 
 }
+

@@ -141,10 +141,6 @@ void BuildQueue::handleUnitEntry(QueueEntry& entry, int index){
         }
     }
 
-    //somehow i think putting this after the build commands helps idk
-    //adds prereqs to queue if we have need
-    if (!onIbo) queueNextPrereq(nextUnit);
-
 }
 
 void BuildQueue::handleUpgradeEntry(QueueEntry& entry, int index){
@@ -431,10 +427,6 @@ BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type){
 //won't work for lurkers, should for all else; should check if we need prereqs at all before calling this
 BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
 
-    if(type == BWAPI::UnitTypes::Protoss_Probe || type == BWAPI::UnitTypes::Protoss_Nexus || 
-        type == BWAPI::UnitTypes::Protoss_Pylon){
-        return BWAPI::UnitTypes::None;
-    }
 
     const std::map<BWAPI::UnitType, int> reqs = type.requiredUnits();
 
@@ -462,9 +454,7 @@ BWAPI::UnitType BuildQueue::queueNextPrereq(BWAPI::UnitType type){
         }
         if (added) continue;
 
-        
-
-        //add one to queue if not built yet and not on the way to build 
+        //finally check if it's not built yet and queue if so
         if(!Tools::CountUnitsOfType(reqType, BWAPI::Broodwar->self()->getUnits())){
             addEntryNow(1, reqType);
             return reqType; //only building the first one
@@ -486,8 +476,14 @@ bool BuildQueue::BuildBuilding(BWAPI::UnitType type, BWAPI::Unit *foundBuilder, 
     if (!builder) { return false; }
     *foundBuilder = builder;
 
+    //If we don't have the tech queue at least one of the prereqs
+    if(!BWAPI::Broodwar->canMake(type, builder) && !onIbo){
+            queueNextPrereq(type);
+            return false;
+    }
+
     // Desired location is argument now
-    //if we are morphing do that now
+    //if we are morphing do that now; this may eff up add-ons for terran
     if(builderType.isBuilding()){
         return builder->morph(type);
     }
@@ -515,6 +511,12 @@ BuildResult BuildQueue::TrainUnit(BWAPI::UnitType type){
     }
 
     if(trainerSet.size() == 0) return NO_TRAINER;
+
+    //If we don't have the tech queue at least one of the prereqs
+    if(!BWAPI::Broodwar->canMake(type, *trainerSet.begin()) && !onIbo){
+            queueNextPrereq(type);
+            return FAILED;
+    }
 
     for (auto& trainer : trainerSet){
         if (!trainer->isTraining()){
