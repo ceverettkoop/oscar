@@ -61,6 +61,7 @@ public:
     OscarMap* mapPtr = nullptr;
     BuildQueue* bq = nullptr;
     std::map<int, BaseEconomy> ownedBases;
+    std::vector<BWEM::Base*> enemyBases;
     std::map<int, CombatGroup> combatGroups;
     std::vector<InstructionEntry> instructions;
 

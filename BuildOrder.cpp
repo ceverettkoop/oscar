@@ -189,6 +189,8 @@ void BuildQueue::updateQueue(){
         BWAPI::UnitType pylon = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
         int supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
         int droneCount = Tools::CountUnitsOfType(worker, BWAPI::Broodwar->self()->getUnits());
+        //try to take a third at end of IBO
+        gs->basesDesired = 3;
 
         //PYLON QUEUE (should work for other supply too)
         //are we supply blocked add 1 pylon to queue
@@ -203,7 +205,7 @@ void BuildQueue::updateQueue(){
 
         //Try to expand if told to
             if(gs->basesDesired > gs->activeBaseCount){
-                addEntryTotal(gs->basesDesired , BWAPI::BroodwarPtr->self()->getRace().getResourceDepot());
+                addEntryTotal(gs->basesDesired, BWAPI::BroodwarPtr->self()->getRace().getResourceDepot());
                 //reset flag now that it's been queued
             }
     }
@@ -409,7 +411,7 @@ BWAPI::TilePosition BuildQueue::determineLocation(BWAPI::UnitType type){
     //gs should tell us which base to build this building at
     if(type == BWAPI::BroodwarPtr->self()->getRace().getResourceDepot()){
         if(gs->hatcheryMain) return BWAPI::Broodwar->self()->getStartLocation();
-        return gs->mapPtr->findNextExpansion(gs)->Location();
+            else return gs->mapPtr->findNextExpansion(gs)->Location();
 
     //this will return first owned base that has less refineries than geysers
     }else if (type == BWAPI::BroodwarPtr->self()->getRace().getRefinery()){

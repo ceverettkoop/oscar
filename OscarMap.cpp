@@ -98,10 +98,46 @@ const BWEM::Base * OscarMap::findNextExpansion(GameState *gs){
     //assume if we have less than two bases occupied we want to take the natural
     if(gs->activeBaseCount < 2){
         return myNatural;
+    }else{
+        //ogre expansion logic
+        bool occupied = false;
+        const BWEM::Base* baseBest = nullptr;
+        int distBest = 0;
+
+        for(auto &base : allBases){
+            //make sure isn't occupied by me
+            for(auto &mine : gs->ownedBases){
+                if(base == mine.second.base){
+                    occupied = true;
+                    break;
+                }
+            }
+            if(occupied) continue;
+
+            //make sure isn't occupied by enemy
+            for(auto &enemy: gs->enemyBases){
+                if(base == enemy){
+                    occupied = true;
+                    break;
+                }
+            }
+            if(occupied) continue;
+
+            //ok if unoccupied check distance
+            const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(myMain->Center(), base->Center() );
+            const auto dist = Path.size();
+
+            if (dist < distBest) {
+                distBest = dist;
+                baseBest = base;
+            }
+        }
+
+        return baseBest;
+    
     }
     
-    //TODO add third base logic :)
-    return myNatural;
+
 
 }
 
