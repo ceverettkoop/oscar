@@ -34,15 +34,7 @@ obj/*.obj
 *.app
 *.o
 
-
-obj/main.o
 .vs/*
-obj/*
-obj/main.o
-obj/MapTools.o
-obj/ReplayParser.o
-obj/StarterBot.o
-obj/Tools.o
 vc140.pdb
 .gitignore
 bin/ms/dumbbot_d.pdb

@@ -6,12 +6,11 @@
 
 #include "GameState.h"
 #include "Decider.h"
-#include "OscarMap.h"
+#include "Map/OscarMap.h"
 #include "BuildOrder.h"
 #include "Macro.h"
-#pragma once
 
-#include "MapTools.h"
+#include "Map/MapTools.h"
 #include <BWAPI.h>
 #include <vector>
 #include <BWEM/bwem.h>

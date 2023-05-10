@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "BuildOrder.h"
-#include "OscarMap.h"
+#include "Map/OscarMap.h"
 #include "Tools.h"
 #include <cstring>
 

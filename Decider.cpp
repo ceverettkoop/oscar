@@ -1,5 +1,5 @@
 #include "Decider.h"
-#include "OscarMap.h"
+#include "Map/OscarMap.h"
 #include "Tools.h"
 #include "BuildOrder.h"
 #include <map>

@@ -2,7 +2,7 @@
 //micro processed elsewhere
 
 #include "GameState.h"
-#include "OscarMap.h"
+#include "Map/OscarMap.h"
 #include "Macro.h"
 #include "Decider.h"
 #include "Tools.h"
