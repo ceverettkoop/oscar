@@ -8,6 +8,7 @@
 *.obj
 obj/*.o
 obj/*.obj
+obj/Win32/*
 
 # Precompiled Headers
 *.gch
@@ -25,7 +26,7 @@ obj/*.obj
 # Compiled Static libraries
 *.lai
 *.la
-*.a
+#*.a
 *.lib
 
 # Executables
@@ -33,6 +34,9 @@ obj/*.obj
 *.out
 *.app
 *.o
+
+#Windows debug stuff
+x64/*
 
 .vs/*
 vc140.pdb
