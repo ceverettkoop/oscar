@@ -10,7 +10,6 @@
 #include "BuildOrder.h"
 #include "Macro.h"
 
-#include "Map/MapTools.h"
 #include <BWAPI.h>
 #include <vector>
 #include <BWEM/bwem.h>
@@ -21,7 +20,6 @@ class Oscar;
 
 class Oscar : public BWAPI::AIModule
 {
-    MapTools m_mapTools;
 
 public:
 
@@ -34,9 +32,7 @@ public:
     Oscar(){};
 
 	//general bot actions
-    void sendIdleWorkersToMinerals();
     void drawDebugInformation();
-	void collectGas(int countPerGeyser);
 
     // functions that are triggered by various BWAPI events from main.cpp
 	void onStart();

@@ -1,4 +1,4 @@
-//mostly taken from StartCraft example bot by Dave Churchill
+//a lot of these taken from StartCraft example bot by Dave Churchill
 
 #include "Tools.h"
 #include "Oscar.h"

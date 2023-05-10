@@ -13,8 +13,6 @@ void Oscar::onStart()
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
-    // Call MapTools OnStart TODO: eliminate this
-    m_mapTools.onStart();
 
     //Initalize BWEM, will replace above if possible
     BWEM::Map::Instance().Initialize(BWAPI::BroodwarPtr);
@@ -45,8 +43,6 @@ void Oscar::onStart()
 // Called on each frame of the game
 void Oscar::onFrame()
 {
-    // Update our MapTools information
-    m_mapTools.onFrame();
 
     //Update Oscars map tools
     map.onFrame();
@@ -62,57 +58,13 @@ void Oscar::onFrame()
     //this assigns scouts; assigns workers; hopefully ignores builders commanded above
     macro.onFrame();
 
+
+    //debug stuff
     // Draw unit health bars, which brood war unfortunately does not do
     //Tools::DrawUnitHealthBars();
 
     // Draw some relevent information to the screen to help us debug the bot
     drawDebugInformation();
-}
-
-// Send our idle workers to mine minerals so they don't just stand there
-void Oscar::sendIdleWorkersToMinerals(){
-
-    // Let's send all of our starting workers to the closest mineral to them
-    // First we need to loop over all of the units that we (BWAPI::Broodwar->self()) own
-    const BWAPI::Unitset& myUnits = BWAPI::Broodwar->self()->getUnits();
-    for (auto& unit : myUnits)
-    {
-        // Check the unit type, if it is an idle worker, then we want to send it somewhere
-        if (unit->getType().isWorker() && unit->isIdle())
-        {
-            // Get the closest mineral to this worker unit
-            BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
-
-            // If a valid mineral was found, right click it with the unit in order to start harvesting
-            if (closestMineral) { unit->rightClick(closestMineral); }
-        }
-    }
-}
-
-void Oscar::collectGas(int countPerGeyser){
-
-    BWAPI::Unitset refineries = Tools::GetUnitSetofType(BWAPI::Broodwar->self()->getRace().getRefinery());
-    if(refineries.size() == 0) return;
-
-    //how many workers are collecting gas
-    //this will need to get more complex for multibase
-    //sending one per frame TODO stagger them
-    const BWAPI::Unitset& myUnits = BWAPI::Broodwar->self()->getUnits();
-    int foundGatherers = 0;
-    for (auto& unit : myUnits){
-        if (unit->getType().isWorker() && unit->isGatheringGas()) foundGatherers++;
-    }
-
-    if(foundGatherers < countPerGeyser){
-        for (auto& unit : myUnits){
-            if (unit->getType().isWorker() && unit->isGatheringMinerals()){
-                BWAPI::Unit closestGas = Tools::GetClosestUnitTo(unit, refineries);
-                unit->gather(closestGas);
-                break;
-            }
-        }
-    }
-
 }
 
 
@@ -163,10 +115,8 @@ void Oscar::onUnitMorph(BWAPI::Unit unit){
 // Called whenever a text is sent to the game by a user
 void Oscar::onSendText(std::string text) 
 { 
-    if (text == "/map")
-    {
-        m_mapTools.toggleDraw();
-    }
+
+
 }
 
 // Called whenever a unit is created, with a pointer to the destroyed unit
