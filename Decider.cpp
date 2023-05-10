@@ -102,7 +102,7 @@ void Decider::setScouting(){
 
 }
 
-//set relevant variables to determinign worker count per base
+//set relevant variables to determining worker count per base
 //this function should be renamed!
 void Decider::calculateWorkers(){
     const BWAPI::Unitset units = BWAPI::Broodwar->self()->getUnits();
