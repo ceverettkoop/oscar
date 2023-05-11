@@ -15,27 +15,23 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 VPATH = src:src/Map
 INSTALLPATH= /home/sean/development/bwapi/build/bin/bwapi-data/AI/
 BINNAME=oscar.so
-LINKER =g++
-LINKERFLAGS =-shared -o
 
 #windows changes
 ifeq ($(OS),Windows_NT)
-	override CPPFLAGS = -I$(IDIR) -ggdb -fPIC -mabi=ms -m32
+	override CPPFLAGS = -I$(IDIR) -ggdb -fPIC -mabi=ms -m32 -std=c++17
 	override INSTALLPATH = /c/Users/sean/BWAPI/Starcraft/bwapi-data/AI/
 	override LDLIBS =  -l:libBWEM.a -l:libBWAPIClient.a -l:libBWAPILIB.a
 	override BINNAME = oscar.dll
-	override LINKER = dlltool
-	override LINKERFLAGS = 
 endif
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	$(CXX) -c -o $@ $< $(CPPFLAGS)
+	$(CXX) -c -o $@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 	
 $(ODIR)/%.o: Map/%.cpp $(DEPS)
-	$(CXX) -c -o $@ $< $(CPPFLAGS)
+	$(CXX) -c -o $@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 
 mybot:$(OBJ)
-	$(LINKER) $(LINKERFLAGS) ../bin/$(BINNAME) $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -shared -o ../bin/$(BINNAME) $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 
 $(DEPDIR): ; @mkdir -p $@
 
