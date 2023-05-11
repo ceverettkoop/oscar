@@ -14,22 +14,28 @@ _OBJ=BuildOrder.o Oscar.o main.o Dll.o Tools.o Macro.o Decider.o OscarMap.o Micr
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 VPATH = src:src/Map
 INSTALLPATH= /home/sean/development/bwapi/build/bin/bwapi-data/AI/
+BINNAME=oscar.so
+LINKER =g++
+LINKERFLAGS =-shared -o
 
 #windows changes
 ifeq ($(OS),Windows_NT)
-	override CPPFLAGS = -I$(IDIR) -ggdb -fPIC -mabi=ms -m32 -std=c++17
+	override CPPFLAGS = -I$(IDIR) -ggdb -fPIC -mabi=ms -m32
 	override INSTALLPATH = /c/Users/sean/BWAPI/Starcraft/bwapi-data/AI/
-	override LDLIBS = -l:libBWAPILIB.a -l:libBWAPIClient.a -l:libBWEM.a -l:libBWAPI.a
+	override LDLIBS =  -l:libBWEM.a -l:libBWAPIClient.a -l:libBWAPILIB.a
+	override BINNAME = oscar.dll
+	override LINKER = dlltool
+	override LINKERFLAGS = 
 endif
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	$(CXX) -c -o $@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -c -o $@ $< $(CPPFLAGS)
 	
 $(ODIR)/%.o: Map/%.cpp $(DEPS)
-	$(CXX) -c -o $@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -c -o $@ $< $(CPPFLAGS)
 
 mybot:$(OBJ)
-	$(CXX) -shared -o ../bin/oscar.so $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(LINKER) $(LINKERFLAGS) ../bin/$(BINNAME) $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 
 $(DEPDIR): ; @mkdir -p $@
 
@@ -46,6 +52,6 @@ clean:
 .PHONY: install
 
 install:
-	cp $(INSTALLPATH)/mybot.so
+	cp  ../bin/$(BINNAME) $(INSTALLPATH)/$(BINNAME)
 	cp -r ../bin/read/* $(INSTALLPATH)/read/
 	cp -r ../bin/write/* $(INSTALLPATH)/write/
