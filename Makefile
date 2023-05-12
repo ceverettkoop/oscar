@@ -1,7 +1,7 @@
 CC=gcc
 CXX=g++
 CFLAGS=-I$(IDIR)
-CPPFLAGS=-I$(IDIR) -ggdb -fPIC
+CPPFLAGS=-I$(IDIR) -fPIC -ggdb	
 ODIR=obj
 IDIR =../include
 LDFLAGS=-L../lib
@@ -15,23 +15,30 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 VPATH = src:src/Map
 INSTALLPATH= /home/sean/development/bwapi/build/bin/bwapi-data/AI/
 BINNAME=oscar.so
+SHAREDFLAG = -shared
+OFLAG=-o 
+#DEFFLAG=
 
 #windows changes
 ifeq ($(OS),Windows_NT)
-	override CPPFLAGS = -I$(IDIR) -ggdb -fPIC -mabi=ms -m32 -std=c++17
+	override CPPFLAGS = -I$(IDIR)
 	override INSTALLPATH = /c/Users/sean/BWAPI/Starcraft/bwapi-data/AI/
-	override LDLIBS =  -l:libBWEM.a -l:libBWAPIClient.a -l:libBWAPILIB.a
+	override LDLIBS = ..\lib\BWEM-Release.lib ..\lib\BWAPIClient.lib ..\lib\BWAPILIB.lib
 	override BINNAME = oscar.dll
+	override SHAREDFLAG = -LD
+	override OFLAG = -Fo./
+
+#	override DEFFLAG = oscar.def
 endif
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	$(CXX) -c -o $@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -c $(OFLAG)$@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 	
 $(ODIR)/%.o: Map/%.cpp $(DEPS)
-	$(CXX) -c -o $@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -c $(OFLAG)$@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 
 mybot:$(OBJ)
-	$(CXX) -shared -o ../bin/$(BINNAME) $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(SHAREDFLAG) $(OFLAG)../bin/$(BINNAME) $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 
 $(DEPDIR): ; @mkdir -p $@
 

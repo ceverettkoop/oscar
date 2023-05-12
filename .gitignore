@@ -27,7 +27,6 @@ obj/Win32/*
 *.lai
 *.la
 #*.a
-*.lib
 
 # Executables
 *.exe
@@ -49,3 +48,6 @@ bin/ms/dumbbot_d.exp
 .vscode/c_cpp_properties.json
 .vscode/tasks.json
 dumbbotWin32.code-workspace
+Win32/.vs/*
+Win32/Release/*
+Win32/Debug/*

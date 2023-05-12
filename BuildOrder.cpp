@@ -1,5 +1,5 @@
 //Really manages everything to do with building buildings or training units
-#ifndef WIN32 //if compiling not on windows
+#ifndef _WIN32 //if compiling not on windows
 #include <unistd.h>
 #else
 #include <direct.h>
