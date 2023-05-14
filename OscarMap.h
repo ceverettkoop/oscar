@@ -5,8 +5,6 @@
 #include "BWEM/bwem.h"
 #include <vector>
 
-struct GameState;
-
 struct BaseEconomy{
 
     const BWEM::Base * base;

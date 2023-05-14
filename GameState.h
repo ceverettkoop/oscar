@@ -1,8 +1,12 @@
 #pragma once
-#include <BWAPI.h>
-#include "BWEM/bwem.h"
+
 #include <vector>
 #include <map>
+#include <BWAPI.h>
+#include "BWEM/bwem.h"
+
+#include "OscarMap.h"
+
 
 class OscarMap;
 class BuildQueue;
