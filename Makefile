@@ -10,7 +10,7 @@ DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 _DEPS=
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ=BuildOrder.o Oscar.o main.o Dll.o Tools.o Macro.o Decider.o OscarMap.o Micro.o
+_OBJ=Dll.o GameState.o Macro.o Oscar.o OscarMap.o Tools.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 VPATH = src:src/Map
 INSTALLPATH= /home/sean/development/bwapi/build/bin/bwapi-data/AI/
@@ -34,8 +34,6 @@ endif
 $(ODIR)/%.o: %.cpp $(DEPS)
 	$(CXX) -c $(OFLAG)$@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 	
-$(ODIR)/%.o: Map/%.cpp $(DEPS)
-	$(CXX) -c $(OFLAG)$@ $< $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 
 mybot:$(OBJ)
 	$(CXX) $(SHAREDFLAG) $(OFLAG)../bin/$(BINNAME) $(OBJ) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
@@ -56,5 +54,5 @@ clean:
 
 install:
 	cp  ../bin/$(BINNAME) $(INSTALLPATH)/$(BINNAME)
-	cp -r ../bin/read/* $(INSTALLPATH)/read/
-	cp -r ../bin/write/* $(INSTALLPATH)/write/
+	cp -r ../bin/read/* $(INSTALLPATH)/../read/
+	cp -r ../bin/write/* $(INSTALLPATH)/../write/

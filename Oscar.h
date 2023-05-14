@@ -5,13 +5,9 @@
 #pragma once
 
 #include "GameState.h"
-#include "Decider.h"
-#include "Map/OscarMap.h"
-#include "BuildOrder.h"
-#include "Macro.h"
+#include "OscarMap.h"
 
 #include <BWAPI.h>
-#include <vector>
 #include <BWEM/bwem.h>
 
 
@@ -23,11 +19,7 @@ class Oscar : public BWAPI::AIModule
 
 public:
 
-	Decider decider;
 	GameState gs;
-	BuildQueue bq = BuildQueue();
-	MacroManager macro = MacroManager();
-	OscarMap map = OscarMap();
 
     Oscar(){};
 

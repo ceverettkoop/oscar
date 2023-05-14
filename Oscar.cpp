@@ -13,55 +13,25 @@ void Oscar::onStart()
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
-
     //Initalize BWEM, will replace above if possible
     BWEM::Map::Instance().Initialize(BWAPI::BroodwarPtr);
     BWEM::Map::Instance().EnableAutomaticPathAnalysis();
     BWEM::Map::Instance().FindBasesForStartingLocations();
 
     //start internal map manager
-    map.onStart();
+    gs.onStart();
 
-    //allow global gamestate variable to access our map info
-    gs.mapPtr = &map;
-
-    //assign game state to decider and macro etc
-    decider.gs = &gs;
-    decider.onStart();
-
-    macro.gs = &gs;
-    macro.onStart();
-
-    bq.gs = &gs;
-
-    bq.onStart();
-
-    gs.bq = &bq;
 
 }
 
 // Called on each frame of the game
-void Oscar::onFrame()
-{
+void Oscar::onFrame(){
 
     //Update Oscars map tools
-    map.onFrame();
+    gs.MapOnFrame();
+    gs.UpdateUnits();
 
-    //Make decisions; interacts with gamestate
-    //wait a few frames to avoid weirdness
-    decider.onFrame();
-
-    //Assign builders to build things and queue units
-    bq.onFrame();
-
-    //Macro level movements
-    //this assigns scouts; assigns workers; hopefully ignores builders commanded above
-    macro.onFrame();
-
-
-    //debug stuff
-    // Draw unit health bars, which brood war unfortunately does not do
-    //Tools::DrawUnitHealthBars();
+    
 
     // Draw some relevent information to the screen to help us debug the bot
     drawDebugInformation();
@@ -71,7 +41,7 @@ void Oscar::onFrame()
 // Draw some relevent information to the screen to help us debug the bot
 void Oscar::drawDebugInformation(){
 
-    //draw build queue
+    /*//draw build queue
     char format[1024] = "Current build priority:\n";
     char qty[16] = "";
     for(int i = 0; i < bq.next.size(); i++){
@@ -84,6 +54,7 @@ void Oscar::drawDebugInformation(){
     BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Minerals:  %d\nGas: %d\nSupply %d/%d\n%s\nApprox seconds: %d\n"
     , BWAPI::Broodwar->self()->minerals(), BWAPI::Broodwar->self()->gas(), ( BWAPI::Broodwar->self()->supplyUsed() / 2), 
     (BWAPI::Broodwar->self()->supplyTotal() / 2), format, (BWAPI::Broodwar->getFrameCount() / 24) );
+    */
 
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
@@ -100,7 +71,7 @@ void Oscar::onEnd(bool isWinner)
 // Called whenever a unit is destroyed, with a pointer to the unit
 void Oscar::onUnitDestroy(BWAPI::Unit unit){
 
-    decider.onUnitDestroy(unit);
+
 	
 }
 
@@ -108,7 +79,7 @@ void Oscar::onUnitDestroy(BWAPI::Unit unit){
 // Zerg units morph when they turn into other units
 void Oscar::onUnitMorph(BWAPI::Unit unit){
 
-    decider.onUnitMorph(unit);
+
 	
 }
 
@@ -130,7 +101,7 @@ void Oscar::onUnitCreate(BWAPI::Unit unit)
 // Called whenever a unit finished construction, with a pointer to the unit
 void Oscar::onUnitComplete(BWAPI::Unit unit)
 {
-    decider.onUnitComplete(unit);
+
 	
 }
 

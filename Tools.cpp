@@ -66,6 +66,21 @@ BWAPI::Unitset Tools::GetUnitSetofType(BWAPI::UnitType type){
     return returnSet;
 }
 
+
+BWAPI::Unitset Tools::GetOtherUnitSet(const BWAPI::Player me) {
+
+    BWAPI::Unitset returnSet;
+
+    for (auto& unit : BWAPI::Broodwar->getAllUnits()){
+        if (unit->getPlayer() != me){
+            returnSet.insert(unit);
+        }
+    }
+
+    return returnSet;
+}
+
+
 BWAPI::Unit Tools::GetBuilder(BWAPI::UnitType type, BWAPI::TilePosition desiredPos){
     
     BWAPI::Unitset eligible;
