@@ -3,7 +3,7 @@
 #include "OscarMap.h"
 #include <vector>
 #include <cfloat>
-#include "../GameState.h"
+#include "GameState.h"
 
 
 void OscarMap::onStart(){
@@ -93,45 +93,31 @@ void OscarMap::findBases(){
 
 }
 
-const BWEM::Base * OscarMap::findNextExpansion(GameState *gs){
+const BWEM::Base * OscarMap::findNextExpansion(const GameState& gs){
     
-    //assume if we have less than two bases occupied we want to take the natural
-    if(gs->activeBaseCount < 2){
-        return myNatural;
-    }else{
-        //ogre expansion logic
-        bool occupied = false;
-        const BWEM::Base* baseBest = nullptr;
-        int distBest = 0;
+    //take natural if not already occupied
+    auto nat = knownBases.find(1);
+    if(nat->second.owner != ALLIED){ return nat->second.base;
 
-        for(auto &base : allBases){
-            //make sure isn't occupied by me
-            for(auto &mine : gs->ownedBases){
-                if(base == mine.second.base){
-                    occupied = true;
-                    break;
-                }
-            }
-            if(occupied) continue;
+    //else ogre expansion logic
+    bool occupied = false;
+    const BWEM::Base* baseBest = nullptr;
+    int distBest = 0;
 
-            //make sure isn't occupied by enemy
-            for(auto &enemy: gs->enemyBases){
-                if(base == enemy){
-                    occupied = true;
-                    break;
-                }
-            }
-            if(occupied) continue;
+    for(auto &base : allBases){
 
-            //ok if unoccupied check distance
-            const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(myMain->Center(), base->Center() );
-            const auto dist = Path.size();
+        auto knownBase = knownBases.find(getBaseKey(base));
+        if( knownBase->second.owner != NEUTRAL ) continue;
 
-            if (dist < distBest) {
-                distBest = dist;
-                baseBest = base;
-            }
+        //if unoccupied check distance
+        const BWEM::CPPath & Path = BWEM::Map::Instance().GetPath(myMain->Center(), base->Center() );
+        const auto dist = Path.size();
+
+        if (dist < distBest) {
+            distBest = dist;
+            baseBest = base;
         }
+    }
 
         return baseBest;
     
@@ -158,4 +144,18 @@ void OscarMap::assignNatural(){
 
     myNatural = baseBest;
 
+}
+
+int OscarMap::getBaseKey(const BWEM::Base * base){
+
+    //unique key per base
+    //0 for main; 1 for nat; other bases pseudo unique value based on distance from main
+    if (base == myMain){
+        return 0;
+    }else if (base == myNatural){
+        return 1;
+    }else{ //generate key based on distance from main + distance from nat (SHOULD be unique)
+        return ( 100 + base->Center().getApproxDistance(myMain->Center()) +
+            base->Center().getApproxDistance(myNatural->Center()) );
+    }
 }

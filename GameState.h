@@ -7,7 +7,6 @@
 
 #include "OscarMap.h"
 
-
 class OscarMap;
 class BuildQueue;
 
@@ -50,6 +49,7 @@ public:
 
     //this class includes knowledge of bases, economy, ownership
     const OscarMap& map = m_map;
+    //map related gs entities
 
 
     //initializing etc

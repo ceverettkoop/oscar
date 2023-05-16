@@ -5,6 +5,7 @@
 #include "BWEM/bwem.h"
 #include <vector>
 
+//one baseeconomy per base
 struct BaseEconomy{
 
     const BWEM::Base * base;
@@ -21,6 +22,8 @@ struct BaseEconomy{
 class OscarMap{
 
 public:
+    OscarMap(){};
+    
     const BWEM::Base* myMain = nullptr;
     const BWEM::Base* myNatural = nullptr;
 
@@ -34,14 +37,13 @@ public:
 
     std::map<int, BaseEconomy> knownBases;
 
-    OscarMap(){};
-
     void onStart();
     void onFrame();
-    const BWEM::Base * findNextExpansion(GameState *gs);
-
+    
+    
+    const BWEM::Base * findNextExpansion(const GameState& gs);
     void assignNatural();
-
+    int getBaseKey(const BWEM::Base * base);
 
 private:    
     void findBases();
